@@ -1,50 +1,72 @@
 #include <Arduino.h>
-#include <U8glib.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Wire.h>
+
 #include "display.h"
 #include "sensores.h"
 #include "irrigacao.h"
 
-U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE);
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
 
-void desenharBarra(int valor) {
-    int largura = map(valor, 0, 100, 0, 100);
-    u8g.drawFrame(0, 35, 100, 10);
-    u8g.drawBox(0, 35, largura, 10);
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+void iniciarDisplay() {
+    if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+        Serial.println("Erro no OLED");
+        while(true);
+    }
+
+    display.clearDisplay();
 }
 
-void draw() {
-    u8g.setFont(u8g_font_6x10);
+// Barra de solo
+void desenharBarra(int valor) {
+    int largura = map(valor, 0, 100, 0, 100);
+    display.drawRect(0, 40, 100, 10, WHITE);
+    display.fillRect(0, 40, largura, 10, WHITE);
+}
 
-    u8g.setPrintPos(0, 10);
-    u8g.print("Temp:");
-    u8g.print(temp);
+void atualizarDisplay() {
+    display.clearDisplay();
 
-    u8g.setPrintPos(70, 10);
-    u8g.print("Ar:");
-    u8g.print(umidadeAr);
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
 
-    u8g.setPrintPos(0, 30);
-    u8g.print("Solo:");
+    display.setCursor(15, 0);
+    display.print("SMARTGREEN V1");
+
+    display.setCursor(0, 15);
+    display.print("Temp:");
+    display.print(temp);
+    display.print("C");
+
+    display.setCursor(70, 15);
+    display.print("Ar:");
+    display.print(umidadeAr);
+    display.print("%");
+
+    display.setCursor(0, 30);
+    display.print("Solo:");
 
     desenharBarra(umidadeSolo);
 
-    u8g.setPrintPos(105, 45);
-    u8g.print(umidadeSolo);
-    u8g.print("%");
+    display.setCursor(105, 42);
+    display.print(umidadeSolo);
+    display.print("%");
 
-    u8g.setPrintPos(0, 60);
+    display.setCursor(0, 55);
+
     if (bombaLigada) {
-        u8g.print("IRRIGANDO");
+        display.print("IRRIGANDO...");
+    } else if (umidadeSolo < 40) {
+        display.print("SOLO SECO");
+    } else if (umidadeSolo > 70) {
+        display.print("SOLO MOLHADO");
     } else {
-        u8g.print("PARADO");
+        display.print("UMIDADE IDEAL");
     }
-}
 
-void iniciarDisplay() {}
-
-void atualizarDisplay() {
-    u8g.firstPage();
-    do {
-        draw();
-    } while (u8g.nextPage());
+    display.display();
 }
