@@ -9,17 +9,37 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 int umidadeSolo = 0;
-float temp = 0;
-float umidadeAr = 0;
+float temp = NAN;
+float umidadeAr = NAN;
+
+bool sensorDHTok = false;
 
 void iniciarSensores() {
     dht.begin();
 }
 
 void lerSensores() {
+    // ===== SENSOR SOLO =====
     int valor = analogRead(SOIL);
-    umidadeSolo = map(valor, 1023, 0, 0, 100);
 
-    temp = dht.readTemperature();
-    umidadeAr = dht.readHumidity();
+    // Se não tiver sensor conectado, valor fica estranho (muito baixo ou alto)
+    if (valor < 10 || valor > 1010) {
+        umidadeSolo = -1; // indica não detectado
+    } else {
+        umidadeSolo = map(valor, 1023, 0, 0, 100);
+    }
+
+    // ===== DHT =====
+    float t = dht.readTemperature();
+    float h = dht.readHumidity();
+
+    if (isnan(t) || isnan(h)) {
+        sensorDHTok = false;
+        temp = NAN;
+        umidadeAr = NAN;
+    } else {
+        sensorDHTok = true;
+        temp = t;
+        umidadeAr = h;
+    }
 }

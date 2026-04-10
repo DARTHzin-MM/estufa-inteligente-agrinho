@@ -1,72 +1,83 @@
 #include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
 #include <Wire.h>
+#include <U8g2lib.h>
 
 #include "display.h"
 #include "sensores.h"
 #include "irrigacao.h"
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, A5, A4);
 
 void iniciarDisplay() {
-    if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-        Serial.println("Erro no OLED");
-        while(true);
-    }
-
-    display.clearDisplay();
+    u8g2.begin();
 }
 
-// Barra de solo
+// Função segura para float
+void printFloat(float valor) {
+    if (isnan(valor)) {
+        u8g2.print("--");
+    } else {
+        u8g2.print(valor);
+    }
+}
+
+// Barra
 void desenharBarra(int valor) {
+    if (valor < 0) return;
+
     int largura = map(valor, 0, 100, 0, 100);
-    display.drawRect(0, 40, 100, 10, WHITE);
-    display.fillRect(0, 40, largura, 10, WHITE);
+    u8g2.drawFrame(10, 40, 100, 10);
+    u8g2.drawBox(10, 40, largura, 10);
 }
 
 void atualizarDisplay() {
-    display.clearDisplay();
+    u8g2.clearBuffer();
 
-    display.setTextSize(1);
-    display.setTextColor(WHITE);
+    u8g2.setFont(u8g2_font_6x10_tr);
 
-    display.setCursor(15, 0);
-    display.print("SMARTGREEN V1");
+    // ===== TÍTULO =====
+    u8g2.drawStr(20, 10, "SMARTGREEN V1");
 
-    display.setCursor(0, 15);
-    display.print("Temp:");
-    display.print(temp);
-    display.print("C");
+    // ===== TEMPERATURA =====
+    u8g2.setCursor(0, 25);
+    u8g2.print("Temp:");
+    printFloat(temp);
+    u8g2.print("C");
 
-    display.setCursor(70, 15);
-    display.print("Ar:");
-    display.print(umidadeAr);
-    display.print("%");
+    // ===== UMIDADE AR =====
+    u8g2.setCursor(70, 25);
+    u8g2.print("Ar:");
+    printFloat(umidadeAr);
+    u8g2.print("%");
 
-    display.setCursor(0, 30);
-    display.print("Solo:");
+    // ===== SOLO =====
+    u8g2.setCursor(0, 35);
+    u8g2.print("Solo:");
 
-    desenharBarra(umidadeSolo);
-
-    display.setCursor(105, 42);
-    display.print(umidadeSolo);
-    display.print("%");
-
-    display.setCursor(0, 55);
-
-    if (bombaLigada) {
-        display.print("IRRIGANDO...");
-    } else if (umidadeSolo < 40) {
-        display.print("SOLO SECO");
-    } else if (umidadeSolo > 70) {
-        display.print("SOLO MOLHADO");
+    if (umidadeSolo == -1) {
+        u8g2.print("ND"); // não detectado
     } else {
-        display.print("UMIDADE IDEAL");
+        desenharBarra(umidadeSolo);
+
+        u8g2.setCursor(110, 50);
+        u8g2.print(umidadeSolo);
+        u8g2.print("%");
     }
 
-    display.display();
+    // ===== STATUS =====
+    u8g2.setCursor(0, 62);
+
+    if (!irrigacaoDetectada) {
+        u8g2.print("IRRIG: ND");
+    } else if (bombaLigada) {
+        u8g2.print("IRRIGANDO...");
+    } else if (umidadeSolo < 40) {
+        u8g2.print("SOLO SECO");
+    } else if (umidadeSolo > 70) {
+        u8g2.print("SOLO MOLHADO");
+    } else {
+        u8g2.print("UMIDADE IDEAL");
+    }
+
+    u8g2.sendBuffer();
 }
