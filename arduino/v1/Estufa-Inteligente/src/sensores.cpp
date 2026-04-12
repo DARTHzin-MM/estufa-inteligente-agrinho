@@ -4,42 +4,33 @@
 
 #define DHTPIN 2
 #define DHTTYPE DHT11
-#define SOIL A0
 
 DHT dht(DHTPIN, DHTTYPE);
 
-int umidadeSolo = 0;
-float temp = NAN;
-float umidadeAr = NAN;
+float temp = 25;
+float umidadeAr = 60;
 
 bool sensorDHTok = false;
+
+unsigned long ultimoDHT = 0;
 
 void iniciarSensores() {
     dht.begin();
 }
 
 void lerSensores() {
-    // ===== SENSOR SOLO =====
-    int valor = analogRead(SOIL);
+    if (millis() - ultimoDHT < 3000) return;
 
-    // Se não tiver sensor conectado, valor fica estranho (muito baixo ou alto)
-    if (valor < 10 || valor > 1010) {
-        umidadeSolo = -1; // indica não detectado
-    } else {
-        umidadeSolo = map(valor, 1023, 0, 0, 100);
-    }
+    ultimoDHT = millis();
 
-    // ===== DHT =====
     float t = dht.readTemperature();
     float h = dht.readHumidity();
 
-    if (isnan(t) || isnan(h)) {
-        sensorDHTok = false;
-        temp = NAN;
-        umidadeAr = NAN;
-    } else {
-        sensorDHTok = true;
+    if (!isnan(t) && !isnan(h)) {
         temp = t;
         umidadeAr = h;
+        sensorDHTok = true;
+    } else {
+        sensorDHTok = false;
     }
 }
