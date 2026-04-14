@@ -31,6 +31,13 @@ void desenharBarra(int valor) {
 }
 
 void atualizarDisplay() {
+    
+    static unsigned long ultimo = 0;
+
+    if (millis() - ultimo < 500) return; // atualiza a cada 0.5s
+
+    ultimo = millis();
+    
     u8g2.clearBuffer();
 
     u8g2.setFont(u8g2_font_6x10_tr);

@@ -35,9 +35,13 @@ void lerSensores() {
     if (isnan(data.temperature) || isnan(data.humidity)) {
         temp = NAN;
         umidadeAr = NAN;
+        Serial.println(temp);
+        Serial.println(umidadeAr);
         return;
     }
 
     temp = data.temperature;
     umidadeAr = data.humidity;
+    Serial.println(temp);
+    Serial.println(umidadeAr);
 }
