@@ -6,53 +6,77 @@
 #include "sensors/soil_sensor.h"
 #include "sensors/light_sensor.h"
 
-// =====================
-// OBJETOS
-// =====================
-SoilSensor soil1(SOIL_SENSOR_1_PIN, SOIL_DRY, SOIL_WET);
-SoilSensor soil2(SOIL_SENSOR_2_PIN, SOIL_DRY, SOIL_WET);
+#include "actuators/irrigation.h"
+#include "core/controller.h"
 
+// Sensores
+SoilSensor soil1(SOIL_SENSOR_1_PIN, SOIL_DRY, SOIL_WET);
 LightSensor ldr(LDR_SENSOR_PIN);
 
-// =====================
-// SETUP
-// =====================
+// Atuadores
+Irrigation waterPump(RELAY_WATER_PIN);
+Irrigation nutrientPump(RELAY_NUTRIENT_PIN);
+
+// Controller
+Controller controller(SOIL_MIN, SOIL_MAX, SOIL_CRITICAL, LIGHT_THRESHOLD);
+
+// Estado
+bool waterState = false;
+bool nutrientState = false;
+
 void setup() {
     Serial.begin(115200);
 
-    pinMode(SOIL_SENSOR_1_PIN, INPUT);
-    pinMode(SOIL_SENSOR_2_PIN, INPUT);
-    pinMode(LDR_SENSOR_PIN, INPUT);
-
-    Serial.println("Sistema iniciado (V2 - Sensores)");
+    waterPump.begin();
+    nutrientPump.begin();
 }
 
-// =====================
-// LOOP
-// =====================
 void loop() {
-    float soilValue1 = soil1.readPercentage();
-    float soilValue2 = soil2.readPercentage();
-    int lightValue = ldr.readRaw();
+    float soil = soil1.readPercentage();
+    int light = ldr.readRaw();
 
-    Serial.println("----- LEITURAS -----");
+    Serial.println("----- SISTEMA -----");
 
-    if (soilValue1 >= 0)
-        Serial.printf("Solo 1: %.2f %%\n", soilValue1);
-    else
-        Serial.println("Erro Solo 1");
+    if (soil >= 0 && light >= 0) {
+        Serial.printf("Solo: %.2f %%\n", soil);
+        Serial.printf("Luz: %d\n", light);
 
-    if (soilValue2 >= 0)
-        Serial.printf("Solo 2: %.2f %%\n", soilValue2);
-    else
-        Serial.println("Erro Solo 2");
+        // 💧 ÁGUA
+        bool water = controller.shouldWater(soil);
 
-    if (lightValue >= 0)
-        Serial.printf("Luz: %d\n", lightValue);
-    else
-        Serial.println("Erro LDR");
+        if (water && !waterState) {
+            waterPump.turnOn();
+            waterState = true;
+            Serial.println("Bomba de ÁGUA LIGADA");
+        }
 
-    Serial.println("---------------------\n");
+        if (!water && waterState) {
+            waterPump.turnOff();
+            waterState = false;
+            Serial.println("Bomba de ÁGUA DESLIGADA");
+        }
 
-    delay(2000); // depois vamos trocar por millis
+        // 🧪 NUTRIENTE
+        bool nutrient = controller.shouldNutrient(soil, light);
+
+        if (nutrient && !nutrientState) {
+            nutrientPump.turnOn();
+            nutrientState = true;
+            Serial.println("Bomba de NUTRIENTE LIGADA");
+        }
+
+        if (!nutrient && nutrientState) {
+            nutrientPump.turnOff();
+            nutrientState = false;
+            Serial.println("Bomba de NUTRIENTE DESLIGADA");
+        }
+    } else {
+        Serial.println("Erro leitura sensores");
+    }
+    Serial.printf("Estado Água: %s\n", waterState ? "ON" : "OFF");
+    Serial.printf("Estado Nutriente: %s\n", nutrientState ? "ON" : "OFF");
+
+    Serial.println("-------------------\n");
+
+    delay(2000);
 }
