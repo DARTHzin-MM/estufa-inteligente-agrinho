@@ -12,38 +12,54 @@
 #include "actuators/irrigation.h"
 #include "core/controller.h"
 
-// Sensores
+// =====================
+// SENSORES
+// =====================
 SoilSensor soil1(SOIL_SENSOR_1_PIN, SOIL_DRY, SOIL_WET);
 LightSensor ldr(LDR_SENSOR_PIN);
 ClimateSensor dht(DHT_PIN);
 
-// Display
+// =====================
+// DISPLAY
+// =====================
 DisplayManager display;
 
-// Atuadores
+// =====================
+// ATUADORES
+// =====================
 Irrigation waterPump(RELAY_WATER_PIN);
 Irrigation nutrientPump(RELAY_NUTRIENT_PIN);
+Irrigation cooler(RELAY_COOLER_PIN);
 
-// Controller
+// =====================
+// CONTROLLER
+// =====================
 Controller controller(SOIL_MIN, SOIL_MAX, SOIL_CRITICAL, LIGHT_THRESHOLD);
 
-// Estado
+// =====================
+// ESTADOS
+// =====================
 bool waterState = false;
 bool nutrientState = false;
+bool coolerState = false;
 
 void setup() {
     Serial.begin(115200);
 
     waterPump.begin();
     nutrientPump.begin();
+    cooler.begin();   // 🔥 inicializa cooler
+
     dht.begin();
+    display.begin();
 
-    display.begin(); // agora seguro
-
-    Serial.println("Sistema iniciado - V2 Etapa 3");
+    Serial.println("Sistema iniciado - V2 Etapa 4");
 }
 
 void loop() {
+    // =====================
+    // LEITURA DOS SENSORES
+    // =====================
     float soil = soil1.readPercentage();
     int light = ldr.readRaw();
     float temp = dht.readTemperature();
@@ -57,6 +73,9 @@ void loop() {
         Serial.printf("Temp: %.2f C\n", temp);
         Serial.printf("Umid: %.2f %%\n", hum);
 
+        // =====================
+        // CONTROLE ÁGUA
+        // =====================
         bool water = controller.shouldWater(soil);
 
         if (water && !waterState) {
@@ -71,6 +90,9 @@ void loop() {
             Serial.println("Bomba de ÁGUA DESLIGADA");
         }
 
+        // =====================
+        // CONTROLE NUTRIENTE
+        // =====================
         bool nutrient = controller.shouldNutrient(soil, light);
 
         if (nutrient && !nutrientState) {
@@ -89,12 +111,36 @@ void loop() {
         Serial.println("Erro leitura sensores");
     }
 
-    Serial.printf("Estado Água: %s\n", waterState ? "ON" : "OFF");
+    // =====================
+    // CONTROLE COOLER
+    // =====================
+    bool cool = controller.shouldCool(temp);
+
+    if (cool && !coolerState) {
+        cooler.turnOn();
+        coolerState = true;
+        Serial.println("COOLER LIGADO");
+    }
+
+    if (!cool && coolerState) {
+        cooler.turnOff();
+        coolerState = false;
+        Serial.println("COOLER DESLIGADO");
+    }
+
+    // =====================
+    // STATUS SERIAL
+    // =====================
+    Serial.printf("Estado Agua: %s\n", waterState ? "ON" : "OFF");
     Serial.printf("Estado Nutriente: %s\n", nutrientState ? "ON" : "OFF");
+    Serial.printf("Estado Cooler: %s\n", coolerState ? "ON" : "OFF"); // 🔥 NOVO
 
     Serial.println("-------------------\n");
 
-    display.showData(soil, light, temp, hum, waterState, nutrientState);
+    // =====================
+    // DISPLAY
+    // =====================
+    display.showData(soil, light, temp, hum, waterState, nutrientState, coolerState);
 
     delay(2000);
 }

@@ -19,3 +19,16 @@ bool Controller::shouldNutrient(float soil, int light) {
     }
     return false;
 }
+
+bool Controller::shouldCool(float temperature) {
+    static bool coolerOn = false;
+
+    if (temperature >= 30) {
+        coolerOn = true;
+    } 
+    else if (temperature <= 27) {
+        coolerOn = false;
+    }
+
+    return coolerOn;
+}

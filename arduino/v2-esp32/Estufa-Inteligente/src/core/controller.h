@@ -6,10 +6,11 @@ private:
     float maxSoil;
     float criticalSoil;
     int lightThreshold;
-
-public:
+    
+    public:
     Controller(float minS, float maxS, float critS, int lightT);
-
+    
     bool shouldWater(float soil);
     bool shouldNutrient(float soil, int light);
+    bool shouldCool(float temperature);
 };

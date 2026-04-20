@@ -13,3 +13,4 @@
 // Relés
 #define RELAY_WATER_PIN     26
 #define RELAY_NUTRIENT_PIN  27
+#define RELAY_COOLER_PIN 25

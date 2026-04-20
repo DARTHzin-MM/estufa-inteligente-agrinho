@@ -6,5 +6,5 @@ private:
 
 public:
     void begin();
-    void showData(float soil, int light, float temp, float hum, bool water, bool nutrient);
+    void showData(float soil, int light, float temp, float hum, bool water, bool nutrient, bool cooler);
 };
