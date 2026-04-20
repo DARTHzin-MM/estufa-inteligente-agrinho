@@ -5,6 +5,9 @@
 
 #include "sensors/soil_sensor.h"
 #include "sensors/light_sensor.h"
+#include "sensors/climate_sensor.h"
+
+#include "display/display_manager.h"
 
 #include "actuators/irrigation.h"
 #include "core/controller.h"
@@ -12,6 +15,10 @@
 // Sensores
 SoilSensor soil1(SOIL_SENSOR_1_PIN, SOIL_DRY, SOIL_WET);
 LightSensor ldr(LDR_SENSOR_PIN);
+ClimateSensor dht(DHT_PIN);
+
+// Display
+DisplayManager display;
 
 // Atuadores
 Irrigation waterPump(RELAY_WATER_PIN);
@@ -29,19 +36,27 @@ void setup() {
 
     waterPump.begin();
     nutrientPump.begin();
+    dht.begin();
+
+    display.begin(); // agora seguro
+
+    Serial.println("Sistema iniciado - V2 Etapa 3");
 }
 
 void loop() {
     float soil = soil1.readPercentage();
     int light = ldr.readRaw();
+    float temp = dht.readTemperature();
+    float hum = dht.readHumidity();
 
     Serial.println("----- SISTEMA -----");
 
     if (soil >= 0 && light >= 0) {
         Serial.printf("Solo: %.2f %%\n", soil);
         Serial.printf("Luz: %d\n", light);
+        Serial.printf("Temp: %.2f C\n", temp);
+        Serial.printf("Umid: %.2f %%\n", hum);
 
-        // 💧 ÁGUA
         bool water = controller.shouldWater(soil);
 
         if (water && !waterState) {
@@ -56,7 +71,6 @@ void loop() {
             Serial.println("Bomba de ÁGUA DESLIGADA");
         }
 
-        // 🧪 NUTRIENTE
         bool nutrient = controller.shouldNutrient(soil, light);
 
         if (nutrient && !nutrientState) {
@@ -70,13 +84,17 @@ void loop() {
             nutrientState = false;
             Serial.println("Bomba de NUTRIENTE DESLIGADA");
         }
+
     } else {
         Serial.println("Erro leitura sensores");
     }
+
     Serial.printf("Estado Água: %s\n", waterState ? "ON" : "OFF");
     Serial.printf("Estado Nutriente: %s\n", nutrientState ? "ON" : "OFF");
 
     Serial.println("-------------------\n");
+
+    display.showData(soil, light, temp, hum, waterState, nutrientState);
 
     delay(2000);
 }
