@@ -43,20 +43,48 @@ bool waterState = false;
 bool nutrientState = false;
 bool coolerState = false;
 
+// =====================
+// CONTROLE DE TEMPO (ÁGUA)
+// =====================
+unsigned long waterStartTime = 0;
+unsigned long waterCooldownTime = 0;
+
+unsigned long waterDuration = 5000; // duração dinâmica
+const unsigned long WATER_COOLDOWN = 10000;
+
+bool waterRunning = false;
+
+// =====================
+// HISTERESIS (ÁGUA)
+// =====================
+bool irrigationNeeded = false;
+
+// =====================
+// CONTROLE DE TEMPO (NUTRIENTE)
+// =====================
+unsigned long nutrientStartTime = 0;
+unsigned long nutrientCooldownTime = 0;
+
+const unsigned long NUTRIENT_DURATION = 3000;
+const unsigned long NUTRIENT_COOLDOWN = 20000;
+
+bool nutrientRunning = false;
+
 void setup() {
     Serial.begin(115200);
 
     waterPump.begin();
     nutrientPump.begin();
-    cooler.begin();   // 🔥 inicializa cooler
+    cooler.begin();
 
     dht.begin();
     display.begin();
 
-    Serial.println("Sistema iniciado - V2 Etapa 4");
+    Serial.println("Sistema iniciado - V2 Etapa 5");
 }
 
 void loop() {
+
     // =====================
     // LEITURA DOS SENSORES
     // =====================
@@ -65,46 +93,87 @@ void loop() {
     float temp = dht.readTemperature();
     float hum = dht.readHumidity();
 
+    // =====================
+    // TEMPO GLOBAL (FIXO)
+    // =====================
+    unsigned long now = millis(); // 🔥 usado no sistema inteiro
+
+    // =====================
+    // AJUSTE INTELIGENTE (ÁGUA)
+    // =====================
+    if (temp >= 30) {
+        waterDuration = 7000;
+    }
+    else if (temp <= 20) {
+        waterDuration = 3000;
+    }
+    else {
+        waterDuration = 5000;
+    }
+
     Serial.println("----- SISTEMA -----");
 
     if (soil >= 0 && light >= 0) {
+
         Serial.printf("Solo: %.2f %%\n", soil);
         Serial.printf("Luz: %d\n", light);
         Serial.printf("Temp: %.2f C\n", temp);
         Serial.printf("Umid: %.2f %%\n", hum);
 
         // =====================
-        // CONTROLE ÁGUA
+        // HISTERESIS DA IRRIGAÇÃO
         // =====================
-        bool water = controller.shouldWater(soil);
+        if (soil >= 0) { // 🔥 evita erro com leitura inválida
+            if (soil < SOIL_MIN) {
+                irrigationNeeded = true;
+            }
+            else if (soil > SOIL_MAX) {
+                irrigationNeeded = false;
+            }
+        }
 
-        if (water && !waterState) {
+        // =====================
+        // CONTROLE ÁGUA COM TEMPO
+        // =====================
+        if (irrigationNeeded && !waterRunning && (now - waterCooldownTime >= WATER_COOLDOWN)) {
             waterPump.turnOn();
             waterState = true;
-            Serial.println("Bomba de ÁGUA LIGADA");
+            waterRunning = true;
+            waterStartTime = now;
+
+            Serial.println("Bomba de ÁGUA LIGADA (tempo controlado)");
         }
 
-        if (!water && waterState) {
+        if (waterRunning && (now - waterStartTime >= waterDuration)) {
             waterPump.turnOff();
             waterState = false;
-            Serial.println("Bomba de ÁGUA DESLIGADA");
+            waterRunning = false;
+            waterCooldownTime = now;
+
+            Serial.println("Bomba de ÁGUA DESLIGADA (fim do ciclo)");
         }
 
         // =====================
-        // CONTROLE NUTRIENTE
+        // CONTROLE NUTRIENTE COM TEMPO
         // =====================
         bool nutrient = controller.shouldNutrient(soil, light);
 
-        if (nutrient && !nutrientState) {
+        if (nutrient && !nutrientRunning && (now - nutrientCooldownTime >= NUTRIENT_COOLDOWN)) {
             nutrientPump.turnOn();
             nutrientState = true;
-            Serial.println("Bomba de NUTRIENTE LIGADA");
+            nutrientRunning = true;
+            nutrientStartTime = now;
+
+            Serial.println("Bomba de NUTRIENTE LIGADA (tempo controlado)");
         }
 
-        if (!nutrient && nutrientState) {
+        if (nutrientRunning && (now - nutrientStartTime >= NUTRIENT_DURATION)) {
             nutrientPump.turnOff();
             nutrientState = false;
-            Serial.println("Bomba de NUTRIENTE DESLIGADA");
+            nutrientRunning = false;
+            nutrientCooldownTime = now;
+
+            Serial.println("Bomba de NUTRIENTE DESLIGADA (fim do ciclo)");
         }
 
     } else {
@@ -133,7 +202,7 @@ void loop() {
     // =====================
     Serial.printf("Estado Agua: %s\n", waterState ? "ON" : "OFF");
     Serial.printf("Estado Nutriente: %s\n", nutrientState ? "ON" : "OFF");
-    Serial.printf("Estado Cooler: %s\n", coolerState ? "ON" : "OFF"); // 🔥 NOVO
+    Serial.printf("Estado Cooler: %s\n", coolerState ? "ON" : "OFF");
 
     Serial.println("-------------------\n");
 
