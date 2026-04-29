@@ -11,11 +11,14 @@ void sendDataToAPI(SensorData data) {
     HTTPClient http;
     http.begin(String(serverURL) + "/dados");
     http.addHeader("Content-Type", "application/json");
-    http.setTimeout(3000);
 
-    StaticJsonDocument<200> doc;
+    StaticJsonDocument<256> doc;
+
     doc["temperatura"] = data.temperatura;
-    doc["umidade"] = data.umidade;
+    doc["umidade_ar"] = data.umidade_ar;
+    doc["luminosidade"] = data.luminosidade;
+    doc["umidade_solo_1"] = data.umidade_solo_1;
+    doc["umidade_solo_2"] = data.umidade_solo_2;
 
     String json;
     serializeJson(doc, json);
@@ -34,13 +37,12 @@ void sendDataToAPI(SensorData data) {
 }
 
 SystemStatus getStatusFromAPI() {
-    SystemStatus status = {false, false};
+    SystemStatus status = {false, false, false};
 
     if (WiFi.status() != WL_CONNECTED) return status;
 
     HTTPClient http;
     http.begin(String(serverURL) + "/status");
-    http.setTimeout(3000);
 
     int httpResponseCode = http.GET();
 
@@ -51,12 +53,10 @@ SystemStatus getStatusFromAPI() {
         DeserializationError error = deserializeJson(doc, resposta);
 
         if (!error) {
-            status.irrigacao = doc["irrigacao"];
-            status.ventilacao = doc["ventilacao"];
+            status.cooler = doc["cooler"];
+            status.water_pump = doc["water_pump"];
+            status.nutr_pump = doc["nutr_pump"];
         }
-    } else {
-        Serial.print("Erro GET: ");
-        Serial.println(httpResponseCode);
     }
 
     http.end();

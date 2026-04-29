@@ -1,11 +1,12 @@
 from fastapi import FastAPI
-from routers import dados
+from routers.estufa import router
+from database.database import create_tables
 
-# Comando para rodar servidor: uvicorn main:app --host 0.0.0.0 --reload
+# codigo pra rodar server: uvicorn main:app --host 0.0.0.0 --reload
 app = FastAPI()
 
-app.include_router(dados.router)
+# 🔹 cria banco ao iniciar
+create_tables()
 
-@app.get("/")
-def home():
-    return {"mensagem": "Servidor rodando"}
+# 🔹 rotas
+app.include_router(router)

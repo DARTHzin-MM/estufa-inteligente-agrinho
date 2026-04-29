@@ -1,9 +1,15 @@
 from pydantic import BaseModel
 
-class Dados(BaseModel):
+# 📊 Dados que chegam do ESP32
+class SensorData(BaseModel):
     temperatura: float
-    umidade: float
+    umidade_ar: float
+    luminosidade: int
+    umidade_solo_1: int
+    umidade_solo_2: int
 
-class Status(BaseModel):
-    irrigacao: bool
-    ventilacao: bool
+# ⚙️ Comandos que voltam pro ESP32
+class SystemStatus(BaseModel):
+    cooler: bool
+    water_pump: bool
+    nutr_pump: bool
