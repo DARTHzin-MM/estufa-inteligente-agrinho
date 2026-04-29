@@ -2,16 +2,7 @@
 #define API_CLIENT_H
 
 #include <Arduino.h>
-
-struct SensorData {
-    float temperatura;
-    float umidade;
-};
-
-struct SystemStatus {
-    bool irrigacao;
-    bool ventilacao;
-};
+#include "models/models.h"
 
 void sendDataToAPI(SensorData data);
 SystemStatus getStatusFromAPI();
