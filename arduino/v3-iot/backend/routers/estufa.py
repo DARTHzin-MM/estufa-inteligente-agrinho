@@ -1,19 +1,22 @@
 from fastapi import APIRouter
 from models.models import SensorData
-from database.database import insert_dados, get_last_status
+from database.database import insert_dados, insert_status_obj, get_last_status
+from services.logic import calculate_status
 
 router = APIRouter()
 
-# 📤 recebe dados do ESP32
 @router.post("/dados")
 def receber_dados(data: SensorData):
     insert_dados(data)
 
+    status = calculate_status(data)
+    insert_status_obj(status)
+
     return {
-        "mensagem": "Dados recebidos"
+        "mensagem": "Dados recebidos",
+        "status": status
     }
 
-# 📥 envia comandos pro ESP32
 @router.get("/status")
 def enviar_status():
     return get_last_status()

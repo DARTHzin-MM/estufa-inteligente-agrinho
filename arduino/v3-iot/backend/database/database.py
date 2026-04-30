@@ -1,7 +1,6 @@
 import sqlite3
 from datetime import datetime
 
-# ⏱️ intervalo mínimo (15 minutos = 900 segundos)
 INTERVALO = 900
 
 
@@ -13,7 +12,6 @@ def create_tables():
     conn = connect()
     cursor = conn.cursor()
 
-    # 📊 tabela de dados
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS dados_estufa (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +24,6 @@ def create_tables():
     )
     """)
 
-    # ⚙️ tabela de controle
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS controle (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,7 +42,6 @@ def insert_dados(data):
     conn = connect()
     cursor = conn.cursor()
 
-    # 🔹 pega último timestamp
     cursor.execute("""
     SELECT timestamp FROM dados_estufa 
     ORDER BY id DESC LIMIT 1
@@ -63,25 +59,71 @@ def insert_dados(data):
             conn.close()
             return
 
-    # 🔹 salva dados
     cursor.execute("""
-INSERT INTO dados_estufa 
-(temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2, timestamp)
-VALUES (?, ?, ?, ?, ?, ?)
-""", (
-    data.temperatura,
-    data.umidade_ar,
-    data.luminosidade,
-    data.umidade_solo_1,
-    data.umidade_solo_2,
-    agora.strftime("%Y-%m-%d %H:%M:%S")
-))
+    INSERT INTO dados_estufa 
+    (temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2, timestamp)
+    VALUES (?, ?, ?, ?, ?, ?)
+    """, (
+        data.temperatura,
+        data.umidade_ar,
+        data.luminosidade,
+        data.umidade_solo_1,
+        data.umidade_solo_2,
+        agora.strftime("%Y-%m-%d %H:%M:%S")
+    ))
 
     conn.commit()
     conn.close()
 
     print("Dados salvos!")
 
+
+def insert_status_obj(status):
+    conn = connect()
+    cursor = conn.cursor()
+
+    # 🔹 pega último status
+    cursor.execute("""
+    SELECT cooler, water_pump, nutr_pump, timestamp
+    FROM controle 
+    ORDER BY id DESC LIMIT 1
+    """)
+
+    row = cursor.fetchone()
+    agora = datetime.now()
+
+    if row:
+        ultimo_status = {
+            "cooler": bool(row[0]),
+            "water_pump": bool(row[1]),
+            "nutr_pump": bool(row[2])
+        }
+
+        ultimo_tempo = datetime.strptime(row[3], "%Y-%m-%d %H:%M:%S")
+        diferenca = (agora - ultimo_tempo).total_seconds()
+
+        # 🔥 REGRA 1: se não mudou E tempo < intervalo → NÃO salva
+        if status == ultimo_status and diferenca < INTERVALO:
+            print("Status ignorado (sem mudança e tempo curto)")
+            conn.close()
+            return
+
+    # 🔹 salva
+    cursor.execute("""
+    INSERT INTO controle (cooler, water_pump, nutr_pump, timestamp)
+    VALUES (?, ?, ?, ?)
+    """, (
+        status["cooler"],
+        status["water_pump"],
+        status["nutr_pump"],
+        agora.strftime("%Y-%m-%d %H:%M:%S")
+    ))
+
+    conn.commit()
+    conn.close()
+
+    print("Status salvo!")
+    
 
 def get_last_status():
     conn = connect()
@@ -108,22 +150,3 @@ def get_last_status():
         "water_pump": False,
         "nutr_pump": False
     }
-
-
-# 🔧 opcional (pra testes manuais)
-def insert_status(status):
-    conn = connect()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-    INSERT INTO controle (cooler, water_pump, nutr_pump, timestamp)
-    VALUES (?, ?, ?, ?)
-    """, (
-        status.cooler,
-        status.water_pump,
-        status.nutr_pump,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    ))
-
-    conn.commit()
-    conn.close()
