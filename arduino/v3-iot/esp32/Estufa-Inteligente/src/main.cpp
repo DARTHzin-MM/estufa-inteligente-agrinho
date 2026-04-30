@@ -2,12 +2,14 @@
 #include "network/wifi_manager.h"
 #include "sensors/sensors.h"
 #include "api/api_client.h"
+#include "actuators/actuators.h"
 
 void setup() {
   Serial.begin(115200);
 
   initWiFi();
   initSensors();
+  initActuators();
 }
 
 void loop() {
@@ -24,10 +26,12 @@ void loop() {
 
   SystemStatus status = getStatusFromAPI();
 
-  Serial.println("---- STATUS ----");
-  Serial.print("Cooler: "); Serial.println(status.cooler);
-  Serial.print("Water Pump: "); Serial.println(status.water_pump);
-  Serial.print("Nutr Pump: "); Serial.println(status.nutr_pump);
+  applyStatus(status);
+
+  Serial.println("---- ATUADORES ----");
+  Serial.print("Cooler: "); Serial.println(status.cooler ? "True" : "False");
+  Serial.print("Water Pump: "); Serial.println(status.water_pump ? "True" : "False");
+  Serial.print("Nutr Pump: "); Serial.println(status.nutr_pump ? "True" : "False");
 
   delay(5000);
 }
