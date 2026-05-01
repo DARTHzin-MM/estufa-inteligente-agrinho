@@ -3,63 +3,104 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 
+// ─────────────────────────────────────────────────
+// 🌐 CONFIGURAÇÃO DA API
+// ─────────────────────────────────────────────────
+
 const char* serverURL = "http://192.168.0.122:8000";
 
+// ─────────────────────────────────────────────────
+// 📤 ENVIO DE DADOS DOS SENSORES
+// ─────────────────────────────────────────────────
+
 void sendDataToAPI(SensorData data) {
-    if (WiFi.status() != WL_CONNECTED) return;
 
-    HTTPClient http;
-    http.begin(String(serverURL) + "/dados");
-    http.addHeader("Content-Type", "application/json");
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[API] WiFi desconectado — POST cancelado");
+        return;
+    }
 
+    // Monta JSON
     StaticJsonDocument<256> doc;
-
-    doc["temperatura"] = data.temperatura;
-    doc["umidade_ar"] = data.umidade_ar;
-    doc["luminosidade"] = data.luminosidade;
+    doc["temperatura"]    = data.temperatura;
+    doc["umidade_ar"]     = data.umidade_ar;
+    doc["luminosidade"]   = data.luminosidade;
     doc["umidade_solo_1"] = data.umidade_solo_1;
     doc["umidade_solo_2"] = data.umidade_solo_2;
 
     String json;
     serializeJson(doc, json);
 
-    int httpResponseCode = http.POST(json);
+    // Retry simples (2 tentativas)
+    for (int tentativa = 1; tentativa <= 2; tentativa++) {
 
-    if (httpResponseCode > 0) {
-        Serial.println("POST OK");
-        Serial.println(http.getString());
-    } else {
-        Serial.print("Erro POST: ");
-        Serial.println(httpResponseCode);
+        HTTPClient http;
+        http.begin(String(serverURL) + "/dados");
+        http.addHeader("Content-Type", "application/json");
+
+        int httpCode = http.POST(json);
+
+        if (httpCode > 0) {
+            Serial.printf("[API] POST /dados → %d\n", httpCode);
+            http.end();
+            return;
+        }
+
+        Serial.printf("[API] Falha POST tentativa %d → %d\n", tentativa, httpCode);
+
+        http.end();
+        delay(500);
     }
 
-    http.end();
+    Serial.println("[API] POST falhou após 2 tentativas");
 }
 
-SystemStatus getStatusFromAPI() {
-    SystemStatus status = {false, false, false};
+// ─────────────────────────────────────────────────
+// 📥 LEITURA DO STATUS DOS ATUADORES
+// ─────────────────────────────────────────────────
 
-    if (WiFi.status() != WL_CONNECTED) return status;
+SystemStatus getStatusFromAPI() {
+
+    SystemStatus status = { false, false, false }; // estado seguro
+
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println("[API] WiFi desconectado — GET cancelado");
+        return status;
+    }
 
     HTTPClient http;
     http.begin(String(serverURL) + "/status");
 
-    int httpResponseCode = http.GET();
+    int httpCode = http.GET();
 
-    if (httpResponseCode > 0) {
+    if (httpCode > 0) {
+
         String resposta = http.getString();
 
         StaticJsonDocument<200> doc;
-        DeserializationError error = deserializeJson(doc, resposta);
+        DeserializationError erro = deserializeJson(doc, resposta);
 
-        if (!error) {
-            status.cooler = doc["cooler"];
-            status.water_pump = doc["water_pump"];
-            status.nutr_pump = doc["nutr_pump"];
+        if (!erro) {
+            status.cooler     = doc["cooler"]     | false;
+            status.water_pump = doc["water_pump"] | false;
+            status.nutr_pump  = doc["nutr_pump"]  | false;
+
+            Serial.printf(
+                "[API] GET /status → %d | cooler=%d pump=%d nutr=%d\n",
+                httpCode,
+                status.cooler,
+                status.water_pump,
+                status.nutr_pump
+            );
+
+        } else {
+            Serial.printf("[API] Erro JSON → %s\n", erro.c_str());
         }
+
+    } else {
+        Serial.printf("[API] GET falhou → %d\n", httpCode);
     }
 
     http.end();
-
     return status;
 }

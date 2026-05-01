@@ -3,35 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GreenMind — Estufa Inteligente</title>
+  <title>SmartGreen — Estufa Inteligente</title>
 
-  <!-- Google Fonts: Syne (títulos) + DM Sans (corpo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
 
-  <!-- Chart.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
   <!-- ═══════════════════════════════════════════
-       SIDEBAR FIXA (menu lateral)
+       SIDEBAR FIXA
   ════════════════════════════════════════════ -->
   <aside class="sidebar">
 
-    <!-- Logo / nome do projeto -->
     <div class="sidebar-logo">
       <div class="logo-icon">🌿</div>
       <div class="logo-text">
-        <span class="logo-title">GreenMind</span>
+        <span class="logo-title">SmartGreen</span>
         <span class="logo-sub">Estufa Inteligente</span>
       </div>
     </div>
 
-    <!-- Links de navegação -->
     <nav class="sidebar-nav">
       <a href="#home" class="nav-item active" data-page="home">
         <span class="nav-icon">⬡</span>
@@ -47,7 +42,6 @@
       </a>
     </nav>
 
-    <!-- Rodapé da sidebar -->
     <div class="sidebar-footer">
       <div class="status-dot"></div>
       <span>Sistema online</span>
@@ -64,14 +58,13 @@
     <header class="topbar">
       <div class="topbar-left">
         <h1 class="page-title" id="page-title">Painel Principal</h1>
-        <!-- Indicador de última atualização -->
         <div class="last-update">
           <span class="pulse-dot"></span>
-          <span>Última atualização: <strong id="last-update-time">—</strong></span>
+          <span>Atualizado: <strong id="last-update-time">—</strong></span>
         </div>
         <div class="api-status" id="api-status">
-          <span class="status-dot offline"></span>
-          <span id="api-text">Desconectado</span>
+          <span class="status-dot offline" id="api-dot"></span>
+          <span id="api-text">Conectando...</span>
         </div>
       </div>
       <div class="topbar-right">
@@ -88,22 +81,16 @@
     <!-- ════ PÁGINA: HOME ════ -->
     <main class="page-content" id="page-home">
 
-      <!-- ── SEÇÃO DE ALERTAS ── -->
-      <section class="alerts-section" id="alerts-section">
-        <!-- Os alertas são inseridos aqui via JavaScript -->
-      </section>
+      <section class="alerts-section" id="alerts-section"></section>
 
-      <!-- ── LABEL DE SEÇÃO ── -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Sensores Ambientais</span>
         <span class="label-line"></span>
       </div>
 
-      <!-- ── CARDS DE SENSORES ── -->
       <div class="sensor-grid">
 
-        <!-- Card: Temperatura -->
         <div class="sensor-card" id="card-temperatura">
           <div class="card-icon-wrap" style="--icon-color: #f97316;">
             <span class="card-icon">🌡</span>
@@ -120,7 +107,6 @@
           </div>
         </div>
 
-        <!-- Card: Umidade do Ar -->
         <div class="sensor-card" id="card-umidade_ar">
           <div class="card-icon-wrap" style="--icon-color: #38bdf8;">
             <span class="card-icon">💧</span>
@@ -137,7 +123,6 @@
           </div>
         </div>
 
-        <!-- Card: Luminosidade -->
         <div class="sensor-card" id="card-luminosidade">
           <div class="card-icon-wrap" style="--icon-color: #facc15;">
             <span class="card-icon">☀</span>
@@ -146,7 +131,7 @@
             <span class="card-label">Luminosidade</span>
             <div class="card-value-row">
               <span class="card-value" id="val-luminosidade">—</span>
-              <span class="card-unit">lux</span>
+              <span class="card-unit">%</span>
             </div>
           </div>
           <div class="card-bar-wrap">
@@ -154,7 +139,6 @@
           </div>
         </div>
 
-        <!-- Card: Solo 1 -->
         <div class="sensor-card" id="card-umidade_solo_1">
           <div class="card-icon-wrap" style="--icon-color: #84cc16;">
             <span class="card-icon">🌱</span>
@@ -171,7 +155,6 @@
           </div>
         </div>
 
-        <!-- Card: Solo 2 -->
         <div class="sensor-card" id="card-umidade_solo_2">
           <div class="card-icon-wrap" style="--icon-color: #4ade80;">
             <span class="card-icon">🌿</span>
@@ -190,17 +173,14 @@
 
       </div><!-- fim sensor-grid -->
 
-      <!-- ── LABEL DE SEÇÃO ── -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Atuadores</span>
         <span class="label-line"></span>
       </div>
 
-      <!-- ── CARDS DE ATUADORES ── -->
       <div class="actuator-grid">
 
-        <!-- Cooler -->
         <div class="actuator-card" id="act-cooler">
           <div class="actuator-top">
             <span class="actuator-icon">🌀</span>
@@ -210,7 +190,6 @@
           <div class="actuator-indicator" id="ind-cooler"></div>
         </div>
 
-        <!-- Bomba de Água -->
         <div class="actuator-card" id="act-water_pump">
           <div class="actuator-top">
             <span class="actuator-icon">🚿</span>
@@ -220,7 +199,6 @@
           <div class="actuator-indicator" id="ind-water_pump"></div>
         </div>
 
-        <!-- Bomba de Nutrientes -->
         <div class="actuator-card" id="act-nutr_pump">
           <div class="actuator-top">
             <span class="actuator-icon">🧪</span>
@@ -232,7 +210,6 @@
 
       </div><!-- fim actuator-grid -->
 
-      <!-- ── GRÁFICO EM TEMPO REAL ── -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Monitoramento em Tempo Real</span>
@@ -260,21 +237,113 @@
 
     <!-- ════ PÁGINA: HISTÓRICO ════ -->
     <main class="page-content hidden" id="page-historico">
-      <div class="placeholder-page">
-        <span class="placeholder-icon">◷</span>
-        <h2>Histórico de Dados</h2>
-        <p>Esta seção exibirá o histórico completo dos sensores.<br>Conecte ao endpoint de histórico para ativar.</p>
+
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Filtro de Período</span>
+        <span class="label-line"></span>
       </div>
+
+      <!-- Botões de filtro -->
+      <div class="period-filter">
+        <button class="period-btn active" data-period="dia">Último Dia</button>
+        <button class="period-btn" data-period="semana">Última Semana</button>
+        <button class="period-btn" data-period="mes">Último Mês</button>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Histórico de Sensores</h2>
+            <p class="chart-sub" id="historico-sub">Selecione um período acima</p>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#f97316;"></span>Temperatura (°C)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade Ar (%)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#84cc16;"></span>Solo 1 (%)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>Solo 2 (%)</span>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height: 320px;">
+          <canvas id="historicoChart"></canvas>
+        </div>
+      </div>
+
     </main>
+    <!-- ════ FIM PÁGINA HISTÓRICO ════ -->
 
     <!-- ════ PÁGINA: CONTROLE ════ -->
     <main class="page-content hidden" id="page-controle">
-      <div class="placeholder-page">
-        <span class="placeholder-icon">⚙</span>
-        <h2>Painel de Controle</h2>
-        <p>Aqui você poderá ligar/desligar atuadores manualmente.<br>Integre endpoints de controle para ativar esta seção.</p>
+
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Modo de Operação</span>
+        <span class="label-line"></span>
       </div>
+
+      <!-- Card de toggle de modo -->
+      <section class="mode-card">
+        <div class="mode-info">
+          <span class="mode-title" id="mode-title">Modo Automático</span>
+          <span class="mode-desc" id="mode-desc">Atuadores controlados pelas regras da estufa</span>
+        </div>
+        <div class="mode-toggle-wrap">
+          <span class="mode-label" id="mode-label-auto">AUTO</span>
+          <button type="button" class="mode-toggle" id="mode-toggle" onclick="toggleModo()">
+            <div class="toggle-thumb"></div>
+          </button>
+          <span class="mode-label" id="mode-label-manual">MANUAL</span>
+        </div>
+      </section>
+
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Atuadores</span>
+        <span class="label-line"></span>
+      </div>
+
+      <!-- Cards de controle manual -->
+      <div class="control-grid">
+
+        <div class="control-card" id="ctrl-cooler">
+          <div class="control-top">
+            <span class="control-icon">🌀</span>
+            <span class="control-name">Cooler</span>
+          </div>
+          <div class="control-status" id="ctrl-status-cooler">
+            Desconectado
+          </div>
+          <button type="button" class="control-btn" id="ctrl-btn-cooler" onclick="toggleAtuador('cooler')" disabled>
+            Carregando...
+          </button>
+        </div>
+
+        <div class="control-card" id="ctrl-water_pump">
+          <div class="control-top">
+            <span class="control-icon">🚿</span>
+            <span class="control-name">Bomba de Água</span>
+          </div>
+          <div class="control-status" id="ctrl-status-water_pump">—</div>
+          <button type="button" class="control-btn" id="ctrl-btn-water_pump" onclick="toggleAtuador('water_pump')" disabled>
+            Ligar
+          </button>
+        </div>
+
+        <div class="control-card" id="ctrl-nutr_pump">
+          <div class="control-top">
+            <span class="control-icon">🧪</span>
+            <span class="control-name">Bomba Nutrientes</span>
+          </div>
+          <div class="control-status" id="ctrl-status-nutr_pump">—</div>
+          <button type="button" class="control-btn" id="ctrl-btn-nutr_pump" onclick="toggleAtuador('nutr_pump')" disabled>
+            Ligar
+          </button>
+        </div>
+
+      </div><!-- fim control-grid -->
+
     </main>
+    <!-- ════ FIM PÁGINA CONTROLE ════ -->
 
   </div><!-- fim main-wrapper -->
 

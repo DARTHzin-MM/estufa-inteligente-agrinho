@@ -4,34 +4,63 @@
 #include "api/api_client.h"
 #include "actuators/actuators.h"
 
-void setup() {
-  Serial.begin(115200);
+const unsigned long LOOP_INTERVAL = 5000;
+unsigned long lastRun = 0;
 
-  initWiFi();
-  initSensors();
-  initActuators();
+// ─────────────────────────────────────────────────
+// 🚀 SETUP
+// ─────────────────────────────────────────────────
+
+void setup() {
+    Serial.begin(115200);
+    delay(500);
+
+    Serial.println("\n=============================");
+    Serial.println("  SmartGreen — Estufa v2.0  ");
+    Serial.println("=============================");
+
+    initWiFi();
+    initSensors();
+    initActuators();
+
+    Serial.println("[Setup] Sistema pronto!\n");
 }
 
+// ─────────────────────────────────────────────────
+// 🔄 LOOP PRINCIPAL (NÃO BLOQUEANTE)
+// ─────────────────────────────────────────────────
+
 void loop() {
-  SensorData data = readSensors();
 
-  Serial.println("---- SENSORES ----");
-  Serial.print("Temp: "); Serial.println(data.temperatura);
-  Serial.print("Umidade: "); Serial.println(data.umidade_ar);
-  Serial.print("Luz: "); Serial.println(data.luminosidade);
-  Serial.print("Solo 1: "); Serial.println(data.umidade_solo_1);
-  Serial.print("Solo 2: "); Serial.println(data.umidade_solo_2);
+    // Executa apenas no intervalo definido
+    if (millis() - lastRun < LOOP_INTERVAL) {
+        return;
+    }
 
-  sendDataToAPI(data);
+    lastRun = millis();
 
-  SystemStatus status = getStatusFromAPI();
+    // ── 1. Leitura dos sensores ──
+    SensorData data = readSensors();
 
-  applyStatus(status);
+    Serial.println("─── SENSORES ───────────────");
+    Serial.printf("  Temperatura : %.1f °C\n", data.temperatura);
+    Serial.printf("  Umidade Ar  : %.1f %%\n", data.umidade_ar);
+    Serial.printf("  Luminosidade: %d %%\n",   data.luminosidade);
+    Serial.printf("  Solo 1      : %d %%\n",   data.umidade_solo_1);
+    Serial.printf("  Solo 2      : %d %%\n",   data.umidade_solo_2);
 
-  Serial.println("---- ATUADORES ----");
-  Serial.print("Cooler: "); Serial.println(status.cooler ? "True" : "False");
-  Serial.print("Water Pump: "); Serial.println(status.water_pump ? "True" : "False");
-  Serial.print("Nutr Pump: "); Serial.println(status.nutr_pump ? "True" : "False");
+    // ── 2. Envia dados ──
+    sendDataToAPI(data);
 
-  delay(5000);
+    // ── 3. Recebe status ──
+    SystemStatus status = getStatusFromAPI();
+
+    // ── 4. Aplica nos relés ──
+    applyStatus(status);
+
+    Serial.println("─── ATUADORES ──────────────");
+    Serial.printf("  Cooler      : %s\n", status.cooler     ? "ON" : "OFF");
+    Serial.printf("  Bomba Água  : %s\n", status.water_pump ? "ON" : "OFF");
+    Serial.printf("  Bomba Nutr. : %s\n", status.nutr_pump  ? "ON" : "OFF");
+    Serial.println();
 }
