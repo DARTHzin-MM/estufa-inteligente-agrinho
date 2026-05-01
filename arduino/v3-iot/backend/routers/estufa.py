@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from models.models import SensorData
-from database.database import insert_dados, insert_status_obj, get_last_status
+from database.database import insert_dados, insert_status_obj, get_last_status, get_last_data
 from services.logic import calculate_status
 
 router = APIRouter()
@@ -20,3 +20,7 @@ def receber_dados(data: SensorData):
 @router.get("/status")
 def enviar_status():
     return get_last_status()
+
+@router.get("/dados")
+def enviar_dados():
+    return get_last_data()

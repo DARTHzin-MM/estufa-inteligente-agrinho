@@ -1,13 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GreenMind — Estufa Inteligente</title>
+
+  <!-- Google Fonts: Syne (títulos) + DM Sans (corpo) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Chart.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    
-    <script src="script.js"></script>
+
+  <!-- ═══════════════════════════════════════════
+       SIDEBAR FIXA (menu lateral)
+  ════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <!-- Logo / nome do projeto -->
+    <div class="sidebar-logo">
+      <div class="logo-icon">🌿</div>
+      <div class="logo-text">
+        <span class="logo-title">GreenMind</span>
+        <span class="logo-sub">Estufa Inteligente</span>
+      </div>
+    </div>
+
+    <!-- Links de navegação -->
+    <nav class="sidebar-nav">
+      <a href="#home" class="nav-item active" data-page="home">
+        <span class="nav-icon">⬡</span>
+        <span>Home</span>
+      </a>
+      <a href="#historico" class="nav-item" data-page="historico">
+        <span class="nav-icon">◷</span>
+        <span>Histórico</span>
+      </a>
+      <a href="#controle" class="nav-item" data-page="controle">
+        <span class="nav-icon">⚙</span>
+        <span>Controle</span>
+      </a>
+    </nav>
+
+    <!-- Rodapé da sidebar -->
+    <div class="sidebar-footer">
+      <div class="status-dot"></div>
+      <span>Sistema online</span>
+    </div>
+
+  </aside>
+
+  <!-- ═══════════════════════════════════════════
+       CONTEÚDO PRINCIPAL
+  ════════════════════════════════════════════ -->
+  <div class="main-wrapper">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title" id="page-title">Painel Principal</h1>
+        <!-- Indicador de última atualização -->
+        <div class="last-update">
+          <span class="pulse-dot"></span>
+          <span>Última atualização: <strong id="last-update-time">—</strong></span>
+        </div>
+        <div class="api-status" id="api-status">
+          <span class="status-dot offline"></span>
+          <span id="api-text">Desconectado</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="user-badge">
+          <div class="user-avatar">G</div>
+          <div class="user-info">
+            <span class="user-name">Gestor</span>
+            <span class="user-role">Administrador</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ════ PÁGINA: HOME ════ -->
+    <main class="page-content" id="page-home">
+
+      <!-- ── SEÇÃO DE ALERTAS ── -->
+      <section class="alerts-section" id="alerts-section">
+        <!-- Os alertas são inseridos aqui via JavaScript -->
+      </section>
+
+      <!-- ── LABEL DE SEÇÃO ── -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Sensores Ambientais</span>
+        <span class="label-line"></span>
+      </div>
+
+      <!-- ── CARDS DE SENSORES ── -->
+      <div class="sensor-grid">
+
+        <!-- Card: Temperatura -->
+        <div class="sensor-card" id="card-temperatura">
+          <div class="card-icon-wrap" style="--icon-color: #f97316;">
+            <span class="card-icon">🌡</span>
+          </div>
+          <div class="card-body">
+            <span class="card-label">Temperatura</span>
+            <div class="card-value-row">
+              <span class="card-value" id="val-temperatura">—</span>
+              <span class="card-unit">°C</span>
+            </div>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar" id="bar-temperatura" style="--bar-color: #f97316;"></div>
+          </div>
+        </div>
+
+        <!-- Card: Umidade do Ar -->
+        <div class="sensor-card" id="card-umidade_ar">
+          <div class="card-icon-wrap" style="--icon-color: #38bdf8;">
+            <span class="card-icon">💧</span>
+          </div>
+          <div class="card-body">
+            <span class="card-label">Umidade do Ar</span>
+            <div class="card-value-row">
+              <span class="card-value" id="val-umidade_ar">—</span>
+              <span class="card-unit">%</span>
+            </div>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar" id="bar-umidade_ar" style="--bar-color: #38bdf8;"></div>
+          </div>
+        </div>
+
+        <!-- Card: Luminosidade -->
+        <div class="sensor-card" id="card-luminosidade">
+          <div class="card-icon-wrap" style="--icon-color: #facc15;">
+            <span class="card-icon">☀</span>
+          </div>
+          <div class="card-body">
+            <span class="card-label">Luminosidade</span>
+            <div class="card-value-row">
+              <span class="card-value" id="val-luminosidade">—</span>
+              <span class="card-unit">lux</span>
+            </div>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar" id="bar-luminosidade" style="--bar-color: #facc15;"></div>
+          </div>
+        </div>
+
+        <!-- Card: Solo 1 -->
+        <div class="sensor-card" id="card-umidade_solo_1">
+          <div class="card-icon-wrap" style="--icon-color: #84cc16;">
+            <span class="card-icon">🌱</span>
+          </div>
+          <div class="card-body">
+            <span class="card-label">Umidade Solo 1</span>
+            <div class="card-value-row">
+              <span class="card-value" id="val-umidade_solo_1">—</span>
+              <span class="card-unit">%</span>
+            </div>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar" id="bar-umidade_solo_1" style="--bar-color: #84cc16;"></div>
+          </div>
+        </div>
+
+        <!-- Card: Solo 2 -->
+        <div class="sensor-card" id="card-umidade_solo_2">
+          <div class="card-icon-wrap" style="--icon-color: #4ade80;">
+            <span class="card-icon">🌿</span>
+          </div>
+          <div class="card-body">
+            <span class="card-label">Umidade Solo 2</span>
+            <div class="card-value-row">
+              <span class="card-value" id="val-umidade_solo_2">—</span>
+              <span class="card-unit">%</span>
+            </div>
+          </div>
+          <div class="card-bar-wrap">
+            <div class="card-bar" id="bar-umidade_solo_2" style="--bar-color: #4ade80;"></div>
+          </div>
+        </div>
+
+      </div><!-- fim sensor-grid -->
+
+      <!-- ── LABEL DE SEÇÃO ── -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Atuadores</span>
+        <span class="label-line"></span>
+      </div>
+
+      <!-- ── CARDS DE ATUADORES ── -->
+      <div class="actuator-grid">
+
+        <!-- Cooler -->
+        <div class="actuator-card" id="act-cooler">
+          <div class="actuator-top">
+            <span class="actuator-icon">🌀</span>
+            <div class="actuator-badge" id="badge-cooler">OFF</div>
+          </div>
+          <span class="actuator-label">Cooler</span>
+          <div class="actuator-indicator" id="ind-cooler"></div>
+        </div>
+
+        <!-- Bomba de Água -->
+        <div class="actuator-card" id="act-water_pump">
+          <div class="actuator-top">
+            <span class="actuator-icon">🚿</span>
+            <div class="actuator-badge" id="badge-water_pump">OFF</div>
+          </div>
+          <span class="actuator-label">Bomba de Água</span>
+          <div class="actuator-indicator" id="ind-water_pump"></div>
+        </div>
+
+        <!-- Bomba de Nutrientes -->
+        <div class="actuator-card" id="act-nutr_pump">
+          <div class="actuator-top">
+            <span class="actuator-icon">🧪</span>
+            <div class="actuator-badge" id="badge-nutr_pump">OFF</div>
+          </div>
+          <span class="actuator-label">Bomba Nutrientes</span>
+          <div class="actuator-indicator" id="ind-nutr_pump"></div>
+        </div>
+
+      </div><!-- fim actuator-grid -->
+
+      <!-- ── GRÁFICO EM TEMPO REAL ── -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Monitoramento em Tempo Real</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Temperatura & Umidade do Ar</h2>
+            <p class="chart-sub">Atualização automática a cada 5 segundos</p>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#f97316;"></span>Temperatura (°C)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade (%)</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+    </main>
+    <!-- ════ FIM PÁGINA HOME ════ -->
+
+    <!-- ════ PÁGINA: HISTÓRICO ════ -->
+    <main class="page-content hidden" id="page-historico">
+      <div class="placeholder-page">
+        <span class="placeholder-icon">◷</span>
+        <h2>Histórico de Dados</h2>
+        <p>Esta seção exibirá o histórico completo dos sensores.<br>Conecte ao endpoint de histórico para ativar.</p>
+      </div>
+    </main>
+
+    <!-- ════ PÁGINA: CONTROLE ════ -->
+    <main class="page-content hidden" id="page-controle">
+      <div class="placeholder-page">
+        <span class="placeholder-icon">⚙</span>
+        <h2>Painel de Controle</h2>
+        <p>Aqui você poderá ligar/desligar atuadores manualmente.<br>Integre endpoints de controle para ativar esta seção.</p>
+      </div>
+    </main>
+
+  </div><!-- fim main-wrapper -->
+
+  <script src="script.js"></script>
 </body>
 </html>

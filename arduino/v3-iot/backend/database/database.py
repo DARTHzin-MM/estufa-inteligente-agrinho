@@ -150,3 +150,34 @@ def get_last_status():
         "water_pump": False,
         "nutr_pump": False
     }
+
+def get_last_data():
+    conn = connect()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    SELECT temperatura, umidade_ar, luminosidade,
+           umidade_solo_1, umidade_solo_2
+    FROM dados_estufa
+    ORDER BY id DESC LIMIT 1
+    """)
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return {
+            "temperatura": row[0],
+            "umidade_ar": row[1],
+            "luminosidade": row[2],
+            "umidade_solo_1": row[3],
+            "umidade_solo_2": row[4]
+        }
+
+    return {
+        "temperatura": 0,
+        "umidade_ar": 0,
+        "luminosidade": 0,
+        "umidade_solo_1": 0,
+        "umidade_solo_2": 0
+    }
