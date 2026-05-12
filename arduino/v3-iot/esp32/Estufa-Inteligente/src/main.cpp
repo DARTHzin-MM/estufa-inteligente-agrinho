@@ -49,13 +49,13 @@ void loop() {
     Serial.printf("  Solo 1      : %d %%\n",   data.umidade_solo_1);
     Serial.printf("  Solo 2      : %d %%\n",   data.umidade_solo_2);
 
-    // ── 2. Envia dados ──
+    // ── 2. Envia dados para API (fonte oficial para dashboard/histórico) ──
     sendDataToAPI(data);
 
-    // ── 3. Recebe status ──
+    // ── 3. Recebe status calculado no backend (auto ou manual) ──
     SystemStatus status = getStatusFromAPI();
 
-    // ── 4. Aplica nos relés ──
+    // ── 4. Aplica status nos relés locais para manter segurança mesmo sem display ──
     applyStatus(status);
 
     Serial.println("─── ATUADORES ──────────────");
