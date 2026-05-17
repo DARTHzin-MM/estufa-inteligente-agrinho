@@ -1,5 +1,11 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
+<!--
+  data-theme="dark" no <html> é o ponto central do sistema de temas.
+  O CSS usa [data-theme="light"] para sobrescrever as variáveis.
+  O script.js alterna esse atributo com:
+    document.documentElement.setAttribute('data-theme', 'light')
+-->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,6 +19,13 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════
+       CONTAINER DE TOASTS
+       Fica no canto inferior direito da tela.
+       O script.js injeta os toasts aqui dinamicamente.
+  ════════════════════════════════════════════ -->
+  <div class="toast-container" id="toast-container"></div>
 
   <!-- ═══════════════════════════════════════════
        SIDEBAR FIXA
@@ -36,6 +49,10 @@
         <span class="nav-icon">◷</span>
         <span>Histórico</span>
       </a>
+      <a href="#plantas" class="nav-item" data-page="plantas">
+        <span class="nav-icon">🌱</span>
+        <span>Plantas</span>
+      </a>
       <a href="#controle" class="nav-item" data-page="controle">
         <span class="nav-icon">⚙</span>
         <span>Controle</span>
@@ -58,16 +75,28 @@
     <header class="topbar">
       <div class="topbar-left">
         <h1 class="page-title" id="page-title">Painel Principal</h1>
+
+        <!-- Badge "Atualizado: HH:MM:SS"
+             Fica vermelho se passar 15s sem dado novo (classe .stale adicionada pelo JS) -->
         <div class="last-update">
           <span class="pulse-dot"></span>
           <span>Atualizado: <strong id="last-update-time">—</strong></span>
         </div>
+
+        <!-- Indicador de status da API: Online/Offline -->
         <div class="api-status" id="api-status">
           <span class="status-dot offline" id="api-dot"></span>
           <span id="api-text">Conectando...</span>
         </div>
       </div>
+
       <div class="topbar-right">
+        <!-- Botão de alternância de tema (☀️ / 🌙)
+             O ícone é atualizado pelo JS em aplicarTema() -->
+        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">
+          ☀️
+        </button>
+
         <div class="user-badge">
           <div class="user-avatar">G</div>
           <div class="user-info">
@@ -81,6 +110,7 @@
     <!-- ════ PÁGINA: HOME ════ -->
     <main class="page-content" id="page-home">
 
+      <!-- Alertas dinâmicos — preenchidos pelo JS -->
       <section class="alerts-section" id="alerts-section"></section>
 
       <div class="section-label">
@@ -89,11 +119,19 @@
         <span class="label-line"></span>
       </div>
 
+      <!-- ─── GRID DE SENSORES ───
+           Cada card tem:
+           - card-icon-wrap: ícone colorido
+           - card-label: nome do sensor
+           - card-value: número grande
+           - card-status-badge: "Ideal", "Atenção", "Crítico" (o JS adiciona a classe status-*)
+           - card-bar-wrap: barra de progresso
+      -->
       <div class="sensor-grid">
 
         <div class="sensor-card" id="card-temperatura">
           <div class="card-icon-wrap" style="--icon-color: #f97316;">
-            <span class="card-icon">🌡</span>
+            <span>🌡</span>
           </div>
           <div class="card-body">
             <span class="card-label">Temperatura</span>
@@ -101,6 +139,7 @@
               <span class="card-value" id="val-temperatura">—</span>
               <span class="card-unit">°C</span>
             </div>
+            <span class="card-status-badge"></span>
           </div>
           <div class="card-bar-wrap">
             <div class="card-bar" id="bar-temperatura" style="--bar-color: #f97316;"></div>
@@ -109,7 +148,7 @@
 
         <div class="sensor-card" id="card-umidade_ar">
           <div class="card-icon-wrap" style="--icon-color: #38bdf8;">
-            <span class="card-icon">💧</span>
+            <span>💧</span>
           </div>
           <div class="card-body">
             <span class="card-label">Umidade do Ar</span>
@@ -117,6 +156,7 @@
               <span class="card-value" id="val-umidade_ar">—</span>
               <span class="card-unit">%</span>
             </div>
+            <span class="card-status-badge"></span>
           </div>
           <div class="card-bar-wrap">
             <div class="card-bar" id="bar-umidade_ar" style="--bar-color: #38bdf8;"></div>
@@ -125,7 +165,7 @@
 
         <div class="sensor-card" id="card-luminosidade">
           <div class="card-icon-wrap" style="--icon-color: #facc15;">
-            <span class="card-icon">☀</span>
+            <span>☀</span>
           </div>
           <div class="card-body">
             <span class="card-label">Luminosidade</span>
@@ -133,6 +173,7 @@
               <span class="card-value" id="val-luminosidade">—</span>
               <span class="card-unit">%</span>
             </div>
+            <span class="card-status-badge"></span>
           </div>
           <div class="card-bar-wrap">
             <div class="card-bar" id="bar-luminosidade" style="--bar-color: #facc15;"></div>
@@ -141,7 +182,7 @@
 
         <div class="sensor-card" id="card-umidade_solo_1">
           <div class="card-icon-wrap" style="--icon-color: #84cc16;">
-            <span class="card-icon">🌱</span>
+            <span>🌱</span>
           </div>
           <div class="card-body">
             <span class="card-label">Umidade Solo 1</span>
@@ -149,6 +190,7 @@
               <span class="card-value" id="val-umidade_solo_1">—</span>
               <span class="card-unit">%</span>
             </div>
+            <span class="card-status-badge"></span>
           </div>
           <div class="card-bar-wrap">
             <div class="card-bar" id="bar-umidade_solo_1" style="--bar-color: #84cc16;"></div>
@@ -157,7 +199,7 @@
 
         <div class="sensor-card" id="card-umidade_solo_2">
           <div class="card-icon-wrap" style="--icon-color: #4ade80;">
-            <span class="card-icon">🌿</span>
+            <span>🌿</span>
           </div>
           <div class="card-body">
             <span class="card-label">Umidade Solo 2</span>
@@ -165,6 +207,7 @@
               <span class="card-value" id="val-umidade_solo_2">—</span>
               <span class="card-unit">%</span>
             </div>
+            <span class="card-status-badge"></span>
           </div>
           <div class="card-bar-wrap">
             <div class="card-bar" id="bar-umidade_solo_2" style="--bar-color: #4ade80;"></div>
@@ -227,8 +270,17 @@
             <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade (%)</span>
           </div>
         </div>
+
+        <!-- position: relative no .chart-wrap permite posicionar o estado vazio por cima -->
         <div class="chart-wrap">
           <canvas id="mainChart"></canvas>
+          <!-- Estado vazio: aparece quando não há dados ainda.
+               O JS adiciona/remove a classe .visible -->
+          <div class="chart-empty-state" id="chart-empty-main">
+            <span class="chart-empty-icon">📡</span>
+            <span>Aguardando dados da API...</span>
+            <span style="font-size:11px; opacity:0.6;">Verifique se o ESP32 está conectado</span>
+          </div>
         </div>
       </div>
 
@@ -244,7 +296,6 @@
         <span class="label-line"></span>
       </div>
 
-      <!-- Botões de filtro -->
       <div class="period-filter">
         <button class="period-btn active" data-period="dia">Último Dia</button>
         <button class="period-btn" data-period="semana">Última Semana</button>
@@ -266,6 +317,11 @@
         </div>
         <div class="chart-wrap" style="height: 320px;">
           <canvas id="historicoChart"></canvas>
+          <div class="chart-empty-state" id="chart-empty-historico">
+            <span class="chart-empty-icon">🗂</span>
+            <span>Nenhum dado para este período</span>
+            <span style="font-size:11px; opacity:0.6;">Tente um período maior ou verifique o banco de dados</span>
+          </div>
         </div>
       </div>
 
@@ -281,7 +337,6 @@
         <span class="label-line"></span>
       </div>
 
-      <!-- Card de toggle de modo -->
       <section class="mode-card">
         <div class="mode-info">
           <span class="mode-title" id="mode-title">Modo Automático</span>
@@ -289,7 +344,7 @@
         </div>
         <div class="mode-toggle-wrap">
           <span class="mode-label" id="mode-label-auto">AUTO</span>
-          <button type="button" class="mode-toggle" id="mode-toggle" onclick="toggleModo()">
+          <button type="button" class="mode-toggle" id="mode-toggle">
             <div class="toggle-thumb"></div>
           </button>
           <span class="mode-label" id="mode-label-manual">MANUAL</span>
@@ -302,7 +357,6 @@
         <span class="label-line"></span>
       </div>
 
-      <!-- Cards de controle manual -->
       <div class="control-grid">
 
         <div class="control-card" id="ctrl-cooler">
@@ -310,11 +364,9 @@
             <span class="control-icon">🌀</span>
             <span class="control-name">Cooler</span>
           </div>
-          <div class="control-status" id="ctrl-status-cooler">
-            Desconectado
-          </div>
+          <div class="control-status" id="ctrl-status-cooler">—</div>
           <button type="button" class="control-btn" id="ctrl-btn-cooler" onclick="toggleAtuador('cooler')" disabled>
-            Carregando...
+            Ligar
           </button>
         </div>
 
@@ -340,10 +392,41 @@
           </button>
         </div>
 
-      </div><!-- fim control-grid -->
+      </div>
 
     </main>
     <!-- ════ FIM PÁGINA CONTROLE ════ -->
+
+  <!-- ════ PÁGINA: PLANTAS ════ -->
+    <main class="page-content hidden" id="page-plantas">
+
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Perfil Ativo</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="planta-ativa-banner oculto" id="planta-ativa-banner">
+        <span class="planta-ativa-banner-emoji" id="planta-ativa-emoji"></span>
+        <span>Perfil ativo: <strong id="planta-ativa-nome">—</strong> — regras automáticas atualizadas</span>
+      </div>
+
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Filtrar por Categoria</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="categoria-filter" id="categoria-filter">
+        <button class="categoria-btn active" data-cat="Todos">Todos</button>
+      </div>
+
+      <div class="plantas-grid" id="plantas-grid">
+        <!-- Cards gerados pelo script.js -->
+      </div>
+
+    </main>
+    <!-- ════ FIM PÁGINA PLANTAS ════ -->
 
   </div><!-- fim main-wrapper -->
 

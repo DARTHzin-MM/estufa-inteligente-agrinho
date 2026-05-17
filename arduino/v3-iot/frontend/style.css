@@ -1,12 +1,17 @@
 @charset "UTF-8";
 
 /* ═══════════════════════════════════════════════════
-   SmartGreen Dashboard — style.css
-   Tema: Dark Agro-Tech  |  Versão: 2.0
+   SmartGreen Dashboard — style.css v3.0
+   Tema: Dark Agro-Tech com suporte a Light Mode
    ═══════════════════════════════════════════════════ */
 
-/* ── VARIÁVEIS DE DESIGN ─────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VARIÁVEIS — TEMA ESCURO (padrão)
+   Todas as cores do sistema ficam aqui.
+   Para mudar o visual, basta trocar os valores aqui.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 :root {
+  /* Cores principais da marca */
   --green-500: #22c55e;
   --green-400: #4ade80;
   --green-600: #16a34a;
@@ -14,40 +19,89 @@
 
   --blue-400: #38bdf8;
   --blue-500: #0ea5e9;
-  --blue-glow: rgba(56, 189, 248, 0.15);
 
+  /* Fundo e superfícies */
   --bg-base:       #0c1018;
   --bg-sidebar:    #0f1520;
   --bg-card:       #131d2b;
   --bg-card-hover: #182334;
   --bg-topbar:     #0e1724;
+  --bg-input:      #1a2538;
 
+  /* Bordas */
   --border:       rgba(255, 255, 255, 0.06);
   --border-green: rgba(34, 197, 94, 0.30);
+  --border-input: rgba(255, 255, 255, 0.12);
 
+  /* Textos */
   --text-primary:   #e8f0fe;
   --text-secondary: #8ca0bb;
   --text-muted:     #4d6278;
 
-  --red:    #ef4444;
-  --orange: #f97316;
-  --yellow: #facc15;
+  /* Cores de estado */
+  --color-good:     #22c55e;   /* dentro da faixa ideal */
+  --color-warning:  #f97316;   /* atenção */
+  --color-critical: #ef4444;   /* crítico */
+  --red:            #ef4444;
+  --orange:         #f97316;
+  --yellow:         #facc15;
 
+  /* Cores para gráficos — usadas no JS também via CSS vars */
+  --chart-grid:     rgba(255, 255, 255, 0.06);
+  --chart-text:     #4d6278;
+
+  /* Layout */
   --sidebar-width: 230px;
   --topbar-height: 64px;
   --radius:    14px;
   --radius-sm:  8px;
 
+  /* Sombras */
   --shadow-card:  0 4px 24px rgba(0, 0, 0, 0.35);
   --shadow-green: 0 0 20px rgba(34, 197, 94, 0.12);
 
+  /* Tipografia */
   --font-display: 'Syne', sans-serif;
   --font-body:    'DM Sans', sans-serif;
 
   --transition: 0.22s ease;
 }
 
-/* ── RESET & BASE ────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   VARIÁVEIS — TEMA CLARO
+   Quando o HTML tem data-theme="light", essas
+   variáveis sobrescrevem as do :root acima.
+   O restante do CSS continua igual — a mágica são
+   as variáveis CSS que trocam automaticamente.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+[data-theme="light"] {
+  --bg-base:       #f0f4f8;
+  --bg-sidebar:    #ffffff;
+  --bg-card:       #ffffff;
+  --bg-card-hover: #f8fafc;
+  --bg-topbar:     #ffffff;
+  --bg-input:      #f0f4f8;
+
+  --border:       rgba(0, 0, 0, 0.08);
+  --border-green: rgba(22, 163, 74, 0.35);
+  --border-input: rgba(0, 0, 0, 0.15);
+
+  --text-primary:   #0f1923;
+  --text-secondary: #3d5166;
+  --text-muted:     #7a95ab;
+
+  --chart-grid:     rgba(0, 0, 0, 0.06);
+  --chart-text:     #7a95ab;
+
+  --shadow-card:  0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-green: 0 0 20px rgba(34, 197, 94, 0.10);
+
+  /* Cores de marca ficam iguais (verde continua verde) */
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESET & BASE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -62,14 +116,18 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  /* Gradiente sutil de fundo — desaparece no tema claro naturalmente */
   background-image:
     radial-gradient(ellipse 80% 60% at 10% 0%, rgba(34, 197, 94, 0.04) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 90% 100%, rgba(56, 189, 248, 0.04) 0%, transparent 60%);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a { text-decoration: none; color: inherit; }
 
-/* ── SIDEBAR ─────────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SIDEBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .sidebar {
   position: fixed;
   top: 0; left: 0;
@@ -83,6 +141,7 @@ a { text-decoration: none; color: inherit; }
   z-index: 100;
   overflow: hidden;
   box-shadow: inset -1px 0 0 var(--border-green), var(--shadow-green);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar-logo {
@@ -149,9 +208,13 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-primary);
 }
 
+[data-theme="light"] .nav-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .nav-item.active {
   background: linear-gradient(90deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
-  color: var(--green-400);
+  color: var(--green-600);
   border: 1px solid var(--border-green);
 }
 
@@ -177,6 +240,7 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-muted);
 }
 
+/* Ponto pulsante de status */
 .status-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -190,7 +254,9 @@ a { text-decoration: none; color: inherit; }
   50%       { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
 }
 
-/* ── MAIN WRAPPER ────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MAIN WRAPPER & TOPBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .main-wrapper {
   margin-left: var(--sidebar-width);
   min-height: 100vh;
@@ -198,7 +264,6 @@ a { text-decoration: none; color: inherit; }
   flex-direction: column;
 }
 
-/* ── TOPBAR ──────────────────────────────────────── */
 .topbar {
   position: sticky;
   top: 0;
@@ -211,12 +276,14 @@ a { text-decoration: none; color: inherit; }
   padding: 0 28px;
   z-index: 50;
   backdrop-filter: blur(10px);
+  transition: background-color 0.3s ease;
 }
 
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .page-title {
@@ -227,6 +294,7 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: -0.3px;
 }
 
+/* Badge "Atualizado: XX:XX" — fica vermelho quando dado é antigo */
 .last-update {
   display: flex;
   align-items: center;
@@ -237,9 +305,18 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid var(--border);
   border-radius: 20px;
   padding: 4px 12px;
+  transition: background 0.3s, border-color 0.3s, color 0.3s;
+}
+
+/* Quando o dado está atrasado, o badge muda de cor */
+.last-update.stale {
+  background: rgba(239, 68, 68, 0.10);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #f87171;
 }
 
 .last-update strong { color: var(--text-secondary); }
+.last-update.stale strong { color: #f87171; }
 
 .pulse-dot {
   width: 7px; height: 7px;
@@ -249,7 +326,65 @@ a { text-decoration: none; color: inherit; }
   animation: pulse-status 2.2s ease infinite;
 }
 
-.topbar-right { display: flex; align-items: center; }
+.last-update.stale .pulse-dot {
+  background: var(--red);
+  animation: none;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* espaço entre os botões e o badge do usuário */
+}
+
+.api-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.status-dot.offline {
+  background: var(--red);
+  animation: none;
+}
+
+.status-dot.online {
+  background: var(--green-500);
+  animation: pulse-status 2.2s ease infinite;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BOTÃO DE TEMA (claro/escuro)
+   Fica na topbar, ao lado do usuário
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: var(--border-green);
+  color: var(--green-400);
+  transform: rotate(20deg);
+}
+
+[data-theme="light"] .theme-toggle-btn:hover {
+  color: var(--green-600);
+}
 
 .user-badge {
   display: flex;
@@ -263,6 +398,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 .user-badge:hover { background: rgba(255,255,255,0.05); }
+[data-theme="light"] .user-badge:hover { background: rgba(0,0,0,0.04); }
 
 .user-avatar {
   width: 34px; height: 34px;
@@ -272,16 +408,81 @@ a { text-decoration: none; color: inherit; }
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 14px;
+  color: #fff;
 }
 
 .user-name  { display: block; font-size: 13px; font-weight: 600; color: var(--text-primary); }
 .user-role  { display: block; font-size: 10px; color: var(--text-muted); }
 
-/* ── CONTEÚDO ────────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST — notificações de erro/sucesso no canto da tela
+   Aparecem por 3s e somem automaticamente
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none; /* não bloqueia cliques atrás */
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  animation: toast-in 0.3s ease forwards;
+  max-width: 320px;
+}
+
+/* Animação: sobe da direita */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Animação de saída: desce e some */
+.toast.hide {
+  animation: toast-out 0.3s ease forwards;
+}
+
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(40px); }
+}
+
+.toast.error {
+  background: rgba(239, 68, 68, 0.95);
+  border: 1px solid rgba(239, 68, 68, 0.60);
+  color: #fff;
+}
+
+.toast.warning {
+  background: rgba(249, 115, 22, 0.95);
+  border: 1px solid rgba(249, 115, 22, 0.60);
+  color: #fff;
+}
+
+.toast.success {
+  background: rgba(34, 197, 94, 0.95);
+  border: 1px solid rgba(34, 197, 94, 0.60);
+  color: #fff;
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CONTEÚDO DAS PÁGINAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .page-content { padding: 28px; flex: 1; }
 .page-content.hidden { display: none; }
 
-/* ── LABEL DE SEÇÃO ─────────────────────────────── */
 .section-label {
   display: flex;
   align-items: center;
@@ -301,7 +502,9 @@ a { text-decoration: none; color: inherit; }
   font-weight: 600;
 }
 
-/* ── ALERTAS ─────────────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ALERTAS (HOME)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .alerts-section {
   display: flex;
   flex-direction: column;
@@ -339,7 +542,11 @@ a { text-decoration: none; color: inherit; }
 
 .alert-icon { font-size: 16px; flex-shrink: 0; }
 
-/* ── GRID DE SENSORES ────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CARDS DE SENSORES
+   Agora com suporte a 3 estados de cor:
+   .status-good / .status-warning / .status-critical
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .sensor-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -356,17 +563,17 @@ a { text-decoration: none; color: inherit; }
   flex-direction: column;
   gap: 12px;
   box-shadow: var(--shadow-card);
-  transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+  transition: transform var(--transition), border-color 0.4s ease, box-shadow var(--transition);
   position: relative;
   overflow: hidden;
 }
 
 .sensor-card:hover {
   transform: translateY(-3px);
-  border-color: rgba(255,255,255,0.12);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
 }
 
+/* Linha colorida no topo do card (cor depende do ícone) */
 .sensor-card::before {
   content: '';
   position: absolute;
@@ -374,6 +581,24 @@ a { text-decoration: none; color: inherit; }
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--icon-color, var(--green-500)), transparent);
   opacity: 0.6;
+  transition: opacity 0.4s ease;
+}
+
+/* Estado BOM: borda verde discreta */
+.sensor-card.status-good {
+  border-color: rgba(34, 197, 94, 0.25);
+}
+
+/* Estado ATENÇÃO: borda laranja */
+.sensor-card.status-warning {
+  border-color: rgba(249, 115, 22, 0.40);
+  box-shadow: var(--shadow-card), 0 0 12px rgba(249, 115, 22, 0.08);
+}
+
+/* Estado CRÍTICO: borda vermelha com brilho */
+.sensor-card.status-critical {
+  border-color: rgba(239, 68, 68, 0.50);
+  box-shadow: var(--shadow-card), 0 0 16px rgba(239, 68, 68, 0.12);
 }
 
 .card-icon-wrap {
@@ -383,6 +608,11 @@ a { text-decoration: none; color: inherit; }
   border: 1px solid rgba(255,255,255,0.07);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
+}
+
+[data-theme="light"] .card-icon-wrap {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0,0,0,0.06);
 }
 
 .card-label {
@@ -407,9 +637,31 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-primary);
   letter-spacing: -1px;
   line-height: 1;
+  transition: color 0.4s ease;
 }
 
+/* O valor muda de cor junto com o estado do card */
+.sensor-card.status-warning .card-value  { color: var(--orange); }
+.sensor-card.status-critical .card-value { color: var(--red); }
+
 .card-unit { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+
+/* Badge de estado: "Ideal", "Atenção", "Crítico" */
+.card-status-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  opacity: 0;           /* invisível por padrão */
+  transition: opacity 0.4s ease;
+}
+
+.sensor-card.status-good     .card-status-badge { opacity: 1; background: rgba(34,197,94,0.15); color: var(--green-400); }
+.sensor-card.status-warning  .card-status-badge { opacity: 1; background: rgba(249,115,22,0.15); color: var(--orange); }
+.sensor-card.status-critical .card-status-badge { opacity: 1; background: rgba(239,68,68,0.15);  color: var(--red); }
 
 .card-bar-wrap {
   height: 4px;
@@ -418,16 +670,26 @@ a { text-decoration: none; color: inherit; }
   overflow: hidden;
 }
 
+[data-theme="light"] .card-bar-wrap {
+  background: rgba(0,0,0,0.06);
+}
+
 .card-bar {
   height: 100%;
   border-radius: 99px;
   background: var(--bar-color, var(--green-500));
   width: 0%;
-  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s ease;
   box-shadow: 0 0 8px var(--bar-color, var(--green-500));
 }
 
-/* ── GRID DE ATUADORES ───────────────────────────── */
+/* Barra muda de cor conforme o estado */
+.sensor-card.status-warning  .card-bar { background: var(--orange); box-shadow: 0 0 8px rgba(249,115,22,0.5); }
+.sensor-card.status-critical .card-bar { background: var(--red);    box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CARDS DE ATUADORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .actuator-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -483,7 +745,9 @@ a { text-decoration: none; color: inherit; }
   box-shadow: 0 0 8px var(--green-glow);
 }
 
-/* ── CARD DO GRÁFICO ─────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   GRÁFICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .chart-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -491,6 +755,7 @@ a { text-decoration: none; color: inherit; }
   padding: 24px;
   box-shadow: var(--shadow-card);
   margin-bottom: 8px;
+  transition: background-color 0.3s ease;
 }
 
 .chart-header {
@@ -511,7 +776,7 @@ a { text-decoration: none; color: inherit; }
 
 .chart-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
 
-.chart-legend { display: flex; align-items: center; gap: 18px; }
+.chart-legend { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 
 .legend-item {
   display: flex;
@@ -523,6 +788,7 @@ a { text-decoration: none; color: inherit; }
 
 .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
+/* Container do canvas com posição relativa para o estado vazio */
 .chart-wrap {
   height: 260px;
   position: relative;
@@ -532,33 +798,32 @@ a { text-decoration: none; color: inherit; }
   height: 320px;
 }
 
-/* ── STATUS DA API ───────────────────────────────── */
-.api-status {
+/* Estado vazio do gráfico — aparece quando não há dados */
+.chart-empty-state {
+  position: absolute;
+  inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  font-size: 12px;
+  justify-content: center;
+  gap: 8px;
   color: var(--text-muted);
+  font-size: 13px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.status-dot.offline { 
-  background: var(--red); 
-  animation: none; 
+.chart-empty-state.visible { opacity: 1; }
+
+.chart-empty-icon {
+  font-size: 32px;
+  opacity: 0.5;
 }
 
-.status-dot.online  { 
-  background: var(--green-500); 
-  animation: pulse-status 2.2s ease infinite;
-}
-
-/* ── LOADING STATE ───────────────────────────────── */
-.loading { opacity: 0.6; pointer-events: none; }
-
-/* ═══════════════════════════════════════════════════
-   NOVOS ESTILOS — v2.0
-   ═══════════════════════════════════════════════════ */
-
-/* ── FILTRO DE PERÍODO (Histórico) ───────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FILTRO DE PERÍODO (Histórico)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .period-filter {
   display: flex;
   gap: 10px;
@@ -581,19 +846,20 @@ a { text-decoration: none; color: inherit; }
 
 .period-btn:hover {
   border-color: var(--border-green);
-  color: var(--green-400);
+  color: var(--green-500);
   background: rgba(34, 197, 94, 0.06);
 }
 
 .period-btn.active {
   background: rgba(34, 197, 94, 0.15);
   border-color: var(--border-green);
-  color: var(--green-400);
+  color: var(--green-500);
   font-weight: 600;
-  transform: scale(0.96);
 }
 
-/* ── MODO CARD (Controle) ────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PÁGINA DE CONTROLE (modo manual)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 .mode-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -629,7 +895,6 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-muted);
 }
 
-/* Toggle de modo */
 .mode-toggle-wrap {
   display: flex;
   align-items: center;
@@ -658,6 +923,10 @@ a { text-decoration: none; color: inherit; }
   flex-shrink: 0;
 }
 
+[data-theme="light"] .mode-toggle {
+  background: rgba(0,0,0,0.08);
+}
+
 .mode-toggle.manual {
   background: rgba(34, 197, 94, 0.20);
   border-color: var(--border-green);
@@ -680,7 +949,6 @@ a { text-decoration: none; color: inherit; }
   box-shadow: 0 0 8px var(--green-glow);
 }
 
-/* ── GRID DE CONTROLE ────────────────────────────── */
 .control-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -701,7 +969,6 @@ a { text-decoration: none; color: inherit; }
 
 .control-card.manual-active {
   border-color: var(--border-green);
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.06);
 }
 
 .control-top {
@@ -718,7 +985,6 @@ a { text-decoration: none; color: inherit; }
   color: var(--text-primary);
 }
 
-/* Valor ON/OFF grande */
 .control-status {
   font-family: var(--font-display);
   font-size: 28px;
@@ -727,15 +993,9 @@ a { text-decoration: none; color: inherit; }
   transition: color var(--transition);
 }
 
-.control-status.on { 
-  color: var(--green-400); 
-}
+.control-status.on  { color: var(--green-400); }
+.control-status.off { color: var(--red); }
 
-.control-status.off {
-  color: var(--red);
-}
-
-/* Botão de toggle do atuador */
 .control-btn {
   padding: 11px;
   border-radius: var(--radius-sm);
@@ -751,6 +1011,10 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: 0.3px;
 }
 
+[data-theme="light"] .control-btn {
+  background: rgba(0,0,0,0.03);
+}
+
 .control-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -759,10 +1023,9 @@ a { text-decoration: none; color: inherit; }
 .control-btn:not(:disabled):hover {
   background: rgba(34, 197, 94, 0.10);
   border-color: var(--border-green);
-  color: var(--green-400);
+  color: var(--green-500);
 }
 
-/* Estado "ligado" do botão */
 .control-btn.btn-on {
   background: rgba(34, 197, 94, 0.20);
   border-color: var(--border-green);
@@ -770,15 +1033,22 @@ a { text-decoration: none; color: inherit; }
   box-shadow: 0 0 10px rgba(34, 197, 94, 0.15);
 }
 
-/* ── RESPONSIVIDADE ──────────────────────────────── */
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LOADING STATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.loading { opacity: 0.6; pointer-events: none; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   RESPONSIVIDADE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 @media (max-width: 1200px) {
   .sensor-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 900px) {
   :root { --sidebar-width: 200px; }
-  .sensor-grid   { grid-template-columns: repeat(2, 1fr); }
-  .control-grid  { grid-template-columns: repeat(2, 1fr); }
+  .sensor-grid  { grid-template-columns: repeat(2, 1fr); }
+  .control-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 680px) {
@@ -796,12 +1066,274 @@ a { text-decoration: none; color: inherit; }
 
   .main-wrapper { margin-left: 60px; }
 
-  .sensor-grid  { grid-template-columns: 1fr 1fr; }
-  .actuator-grid{ grid-template-columns: 1fr; }
-  .control-grid { grid-template-columns: 1fr; }
-  .topbar       { padding: 0 16px; }
-  .page-content { padding: 16px; }
-  .last-update  { display: none; }
+  .sensor-grid   { grid-template-columns: 1fr 1fr; }
+  .actuator-grid { grid-template-columns: 1fr; }
+  .control-grid  { grid-template-columns: 1fr; }
+  .topbar        { padding: 0 16px; }
+  .page-content  { padding: 16px; }
+  .last-update   { display: none; }
 
   .mode-card { flex-direction: column; align-items: flex-start; }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PÁGINA DE PLANTAS — estilos novos
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Filtro de categorias (Todos, Legume, Verdura, Erva...) */
+.categoria-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.categoria-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.categoria-btn:hover {
+  border-color: var(--border-green);
+  color: var(--green-500);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.categoria-btn.active {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--border-green);
+  color: var(--green-500);
+  font-weight: 600;
+}
+
+/* Planta selecionada atualmente */
+.planta-ativa-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid var(--border-green);
+  border-radius: var(--radius-sm);
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--green-400);
+  font-weight: 500;
+}
+
+.planta-ativa-banner.oculto { display: none; }
+.planta-ativa-banner-emoji { font-size: 22px; }
+
+/* Grid de cards de plantas — 4 colunas em telas grandes */
+.plantas-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Card individual de planta */
+.planta-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), border-color 0.35s ease, box-shadow var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.planta-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+}
+
+/* Card com perfil ativo — borda verde brilhante */
+.planta-card.ativo {
+  border-color: var(--green-500);
+  box-shadow: var(--shadow-card), 0 0 20px rgba(34, 197, 94, 0.15);
+}
+
+/* Ribbon "Ativo" no canto superior direito */
+.planta-card.ativo::after {
+  content: 'ATIVO';
+  position: absolute;
+  top: 12px;
+  right: -1px;
+  background: var(--green-500);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Cabeçalho do card: emoji grande + nome + badge de categoria */
+.planta-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.planta-emoji {
+  font-size: 36px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.planta-info { flex: 1; }
+
+.planta-nome {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+/* Badge colorido por categoria */
+.planta-categoria {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 9px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+
+.cat-Legume    { color: #f97316; background: rgba(249,115,22,0.12);  border-color: rgba(249,115,22,0.30); }
+.cat-Verdura   { color: #22c55e; background: rgba(34,197,94,0.12);   border-color: rgba(34,197,94,0.30); }
+.cat-Fruta     { color: #ec4899; background: rgba(236,72,153,0.12);  border-color: rgba(236,72,153,0.30); }
+.cat-Erva      { color: #84cc16; background: rgba(132,204,22,0.12);  border-color: rgba(132,204,22,0.30); }
+.cat-Raiz      { color: #a78bfa; background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.30); }
+.cat-Bulbo     { color: #fb923c; background: rgba(251,146,60,0.12);  border-color: rgba(251,146,60,0.30); }
+.cat-Grão      { color: #facc15; background: rgba(250,204,21,0.12);  border-color: rgba(250,204,21,0.30); }
+.cat-Tubérculo { color: #94a3b8; background: rgba(148,163,184,0.12); border-color: rgba(148,163,184,0.30); }
+
+/* Descrição curta */
+.planta-descricao {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* Parâmetros: Temp, Umidade Ar, Solo */
+.planta-params {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.param-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.param-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.param-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.param-valor {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Barra visual do parâmetro com zona ideal destacada */
+.param-bar-wrap {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .param-bar-wrap {
+  background: rgba(0,0,0,0.06);
+}
+
+/* Zona ideal (a parte colorida da barra) */
+.param-bar-ideal {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 99px;
+  opacity: 0.85;
+}
+
+.param-bar-temp  { background: #f97316; }
+.param-bar-ar    { background: #38bdf8; }
+.param-bar-solo  { background: #22c55e; }
+
+/* Botão de aplicar perfil */
+.planta-btn {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all var(--transition);
+  margin-top: auto;
+}
+
+[data-theme="light"] .planta-btn {
+  background: rgba(0,0,0,0.03);
+}
+
+.planta-btn:hover {
+  background: rgba(34, 197, 94, 0.10);
+  border-color: var(--border-green);
+  color: var(--green-500);
+}
+
+/* Botão quando já é o perfil ativo */
+.planta-card.ativo .planta-btn {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: var(--border-green);
+  color: var(--green-400);
+  cursor: default;
+}
+
+/* Responsividade do grid de plantas */
+@media (max-width: 1300px) {
+  .plantas-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .plantas-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 500px) {
+  .plantas-grid { grid-template-columns: 1fr; }
 }
