@@ -4,102 +4,111 @@
 
 Transformar a estufa em uma solução IoT com monitoramento remoto, histórico de dados e controle manual/automático pelo navegador. Esta é a versão final do projeto, apresentada no Concurso Agrinho 2026.
 
+O principal avanço desta versão é a separação de responsabilidades entre o hardware e a lógica de negócio: o ESP32 passa a ser apenas um coletor/atuador, enquanto toda a inteligência de decisão migra para o backend Python — tornando o sistema muito mais fácil de evoluir e configurar sem recompilar o firmware.
+
 ---
 
-## O que esta versão adicionou
+## O que esta versão adicionou em relação à V2
 
-- Troca do DHT11 pelo DHT22 (mais preciso: ±0.5°C, ±2% umidade)
-- Remoção do display OLED — dados agora vão para o dashboard web
-- Conexão WiFi com reconexão automática via WiFiManager (sem precisar recompilar para trocar a rede)
-- Backend em Python (FastAPI) que recebe, processa e persiste os dados em banco SQLite
-- Dashboard web completo com: sensores em tempo real, gráficos, histórico por período, alertas, modo manual e tema claro/escuro
-- **Perfis de 20 plantas brasileiras:** ao selecionar uma planta, os limiares de irrigação e resfriamento são atualizados automaticamente no backend — sem alterar o código
-- Regras automáticas configuráveis pelo dashboard (não mais hardcoded)
-- Indicador de dado atrasado no dashboard (fica vermelho se passar 15s sem atualização)
-- Notificações visuais (toast) quando a API fica offline
+| Funcionalidade | Detalhe |
+|---------------|---------|
+| Troca DHT11 → DHT22 | Precisão de ±0,5°C e ±2% de umidade (antes ±2°C, ±5%) |
+| Remoção do display OLED | Dados agora são visualizados no dashboard web |
+| Conexão WiFi via WiFiManager | Troca de rede sem recompilar — portal captivo automático |
+| Backend FastAPI + SQLite | Recebe, processa, persiste e serve os dados |
+| Dashboard web completo | Gráfico em tempo real, histórico, alertas, modo manual, tema claro/escuro |
+| Perfis de 20 plantas brasileiras | Limiares de irrigação e resfriamento atualizados automaticamente ao selecionar a planta |
+| Regras automáticas configuráveis | Limiares não são mais hardcoded — vêm do banco de dados |
+| Indicador de dado atrasado | Badge fica vermelho se passar 15s sem atualização do ESP32 |
+| Toasts de notificação | Alerta visual quando a API fica offline |
+| Modo manual no dashboard | Controle direto dos 3 atuadores pelo navegador |
 
 ---
 
 ## Hardware utilizado
 
-> **Instrução:** preencha a coluna *Qtd* após montar o circuito.
-
 ### Microcontrolador
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| ESP32 Dev Board (38 pinos) | | Microcontrolador principal — WiFi + sensores + relés |
-| Cabo USB para upload e alimentação | | Upload do firmware |
-| Fonte 5V DC (adaptador) | | Alimentação em campo |
+| ESP32 Dev Board (38 pinos) | 1 | Microcontrolador principal — WiFi + sensores + relés |
+| Cabo Micro USB | 1 | Upload do firmware e alimentação durante desenvolvimento |
+| Fonte 5V DC (adaptador) | 1 | Alimentação em campo |
 
 ### Sensores
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| Sensor DHT22 | | Temperatura e umidade do ar |
-| Sensor capacitivo de umidade do solo v2.0 | | Solo — ponto 1 |
-| Sensor capacitivo de umidade do solo v2.0 | | Solo — ponto 2 |
-| LDR (fotoresistor) | | Luminosidade |
-| Resistor 10kΩ | | Divisor de tensão para o LDR |
+| Sensor DHT22 | 1 | Temperatura e umidade do ar |
+| Sensor capacitivo de umidade do solo v2.0 | 2 | Solo — pontos 1 e 2 da estufa |
+| LDR (fotoresistor) | 1 | Luminosidade ambiente |
+| Resistor 10kΩ | 1 | Divisor de tensão para o LDR |
 
 ### Atuadores
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| Módulo relé 3 canais (5V, ativo em LOW) | | Liga/desliga os 3 atuadores |
-| Mini bomba de água submersível 5V | | Irrigação das plantas |
-| Mini bomba 5V (nutriente) | | Distribuição de solução nutritiva |
-| Cooler / ventilador | | Resfriamento da estufa |
+| Módulo relé 3 canais (5V, ativo em LOW) | 1 | Liga/desliga os 3 atuadores |
+| Mini bomba de água submersível 5V | 1 | Irrigação das plantas |
+| Mini bomba 5V | 1 | Distribuição de solução nutritiva |
+| Cooler / ventilador 12V | 1 | Resfriamento da estufa |
 
 ### Estrutura e conexões
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| Protoboard 830 pontos | | Montagem do circuito |
-| Jumpers macho-macho | | Conexões gerais |
-| Jumpers macho-fêmea | | Sensores e módulos |
-| Mangueira de silicone (metro) | | Condução da água |
+| Protoboard 830 pontos | 1 | Montagem do circuito |
+| Jumpers macho-macho | 20 | Conexões gerais |
+| Jumpers macho-fêmea | 10 | Sensores e módulos |
+| Mangueira de silicone (metro) | 1 | Condução da água |
 
 ### Infraestrutura (servidor local)
 
 | Item | Qtd | Observação |
 |------|:---:|------------|
-| Notebook / computador | | Roda o backend FastAPI |
-| Roteador WiFi | | ESP32 e servidor na mesma rede |
+| Notebook / computador | 1 | Roda o backend FastAPI na rede local |
+| Roteador WiFi | 1 | ESP32 e servidor devem estar na mesma rede |
 
 ---
 
 ## Mapeamento de pinos (ESP32)
 
-| Pino ESP32 | Componente |
-|:----------:|-----------|
-| GPIO 4 | DHT22 |
-| GPIO 34 (ADC, somente leitura) | Sensor de solo 1 |
-| GPIO 33 (ADC, somente leitura) | Sensor de solo 2 |
-| GPIO 35 (ADC, somente leitura) | LDR |
-| GPIO 18 | Relé — cooler |
-| GPIO 19 | Relé — bomba de água |
-| GPIO 21 | Relé — bomba de nutriente |
+| Pino ESP32 | Componente | Observação |
+|:----------:|-----------|-----------|
+| GPIO 4 | DHT22 | Digital |
+| GPIO 34 (ADC1_CH6) | Sensor de solo 1 | Somente entrada — sem pull-up interno |
+| GPIO 33 (ADC1_CH5) | Sensor de solo 2 | Somente entrada — sem pull-up interno |
+| GPIO 35 (ADC1_CH7) | LDR | Somente entrada — sem pull-up interno |
+| GPIO 18 | Relé — cooler | Ativo em LOW |
+| GPIO 19 | Relé — bomba de água | Ativo em LOW |
+| GPIO 21 | Relé — bomba de nutriente | Ativo em LOW |
 
-> **Atenção:** GPIOs 34, 35 e 33 no ESP32 são somente entrada (input only) — não têm resistor pull-up interno. Ideal para sensores analógicos.
+> **Atenção:** GPIOs 33, 34 e 35 no ESP32 são somente entrada (input-only) e não têm resistor pull-up interno. São ideais para sensores analógicos, mas não devem ser usados como saída.
 
 ---
 
 ## Fluxo de operação
 
 ```
-1. ESP32 conecta ao WiFi (WiFiManager — portal de configuração se não houver rede salva)
+1. ESP32 conecta ao WiFi
+   └─ Se não houver rede salva → cria ponto de acesso "Estufa-ESP32"
+      └─ Operador configura a rede pelo portal captivo (qualquer dispositivo)
+
 2. A cada 5 segundos:
-   a. Lê os 5 sensores
-   b. Envia dados via POST /dados para o backend
-   c. Backend calcula estado dos atuadores com base nos limiares salvos
-   d. ESP32 consulta GET /status
-   e. Aplica o estado nos relés
-3. Dashboard consome GET /dados e GET /status a cada 5s
+   ├─ a. Lê os 5 sensores (DHT22 + 2x solo + LDR)
+   ├─ b. Envia dados via POST /dados para o backend
+   │     └─ Backend calcula estado dos atuadores com base nos limiares do banco
+   ├─ c. ESP32 consulta GET /status
+   └─ d. Aplica o estado recebido nos relés
+
+3. Dashboard (navegador) a cada 5s:
+   ├─ Consome GET /dados → atualiza cards e gráfico em tempo real
+   └─ Consome GET /status → atualiza badges dos atuadores
+
 4. Operador pode:
-   - Ver dados em tempo real e histórico
-   - Selecionar perfil de planta (atualiza limiares automaticamente)
-   - Alternar para modo manual e controlar atuadores diretamente
+   ├─ Visualizar dados em tempo real e histórico (dia/semana/mês)
+   ├─ Selecionar perfil de planta → limiares atualizados via POST /config/regras
+   └─ Ativar modo manual → controlar cada atuador diretamente pelo dashboard
 ```
 
 ---
@@ -110,43 +119,54 @@ Transformar a estufa em uma solução IoT com monitoramento remoto, histórico d
 
 ```bash
 cd arduino/v3-iot/backend
+
+# Cria e ativa o ambiente virtual
 python -m venv .venv
 source .venv/bin/activate        # Linux/Mac
+.venv\Scripts\activate           # Windows
+
+# Instala as dependências
 pip install fastapi uvicorn sqlalchemy pydantic
+
+# Inicia o servidor (acessível para o ESP32 e o dashboard)
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-O banco de dados (`estufa.db`) é criado automaticamente na primeira execução.
+O banco de dados `estufa.db` é criado automaticamente na primeira execução.
+Documentação interativa da API disponível em: `http://localhost:8000/docs`
 
 ### 2. Dashboard
 
-Abra `arduino/v3-iot/frontend/index.html` com o Live Server (VS Code) ou qualquer servidor HTTP local. Clique no ícone ☀️ da topbar para alternar o tema. O IP da API pode ser ajustado diretamente no dashboard.
+Abra `arduino/v3-iot/frontend/index.html` com o Live Server (VS Code) ou qualquer servidor HTTP local. O IP da API pode ser ajustado diretamente no canto superior direito do dashboard.
 
 ### 3. ESP32
 
 ```bash
 cd arduino/v3-iot/esp32/Estufa-Inteligente
+
+# Antes do upload: ajuste o IP do servidor em src/api/api_client.cpp
+# const char* serverURL = "http://SEU_IP_AQUI:8000";
+
 pio run --target upload
 pio device monitor --baud 115200
 ```
-
-Na primeira inicialização sem rede salva, o ESP32 cria um ponto de acesso chamado `Estufa-ESP32`. Conecte nele com qualquer dispositivo e configure a rede pelo portal.
 
 ---
 
 ## Endpoints da API
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `POST` | `/dados` | ESP32 envia leituras dos sensores |
-| `GET`  | `/dados` | Dashboard lê últimas leituras |
-| `GET`  | `/status` | ESP32 e dashboard consultam estado dos atuadores |
-| `GET`  | `/historico?periodo=dia\|semana\|mes` | Histórico para os gráficos |
-| `GET`  | `/controle` | Lê configuração de modo manual |
-| `POST` | `/controle` | Dashboard alterna modo e controla atuadores |
-| `GET`  | `/plantas` | Lista os 20 perfis de plantas disponíveis |
-| `GET`  | `/config/regras` | Lê limiares automáticos ativos |
-| `POST` | `/config/regras` | Atualiza limiares ao aplicar perfil de planta |
+| Método | Rota | Chamado por | Descrição |
+|--------|------|------------|-----------|
+| `GET`  | `/` | — | Health check |
+| `POST` | `/dados` | ESP32 | Recebe leituras dos sensores |
+| `GET`  | `/dados` | Dashboard | Retorna última leitura |
+| `GET`  | `/status` | ESP32 + Dashboard | Estado atual dos atuadores |
+| `GET`  | `/historico?periodo=` | Dashboard | Dados históricos (dia/semana/mês) |
+| `GET`  | `/controle` | Dashboard | Lê modo manual e estado |
+| `POST` | `/controle` | Dashboard | Define modo e aciona atuadores |
+| `GET`  | `/plantas` | Dashboard | Lista 20 perfis de plantas |
+| `GET`  | `/config/regras` | Dashboard | Lê limiares automáticos |
+| `POST` | `/config/regras` | Dashboard | Atualiza limiares por perfil de planta |
 
 ---
 
@@ -163,21 +183,16 @@ lib_deps =
 
 ---
 
-## Limitações atuais
+## Limitações conhecidas e evoluções previstas
 
-- Endereço IP do backend fixo no firmware (pode ser configurado antes do upload)
-- Regras automáticas por intervalo de tempo ainda não implementadas (previsto como evolução)
-- Sem autenticação no dashboard (qualquer pessoa na rede pode acessar)
-- CORS aberto (`allow_origins=["*"]`) — adequado para ambiente local, não para produção
-
----
-
-## Evoluções previstas
-
-- Controle de irrigação por agenda horária
-- Notificações por e-mail ou Telegram quando limiar é ultrapassado
-- Autenticação no dashboard
-- Versionamento da API (`/api/v1/...`)
+| Limitação atual | Evolução prevista |
+|----------------|-----------------|
+| IP do backend fixo no firmware | Configurável pelo portal WiFiManager |
+| Sem autenticação no dashboard | Login com sessão ou token JWT |
+| CORS aberto (`allow_origins=["*"]`) | Restringir ao IP do frontend em produção |
+| Sem agendamento de irrigação por horário | Controle por agenda (cron) |
+| Sem notificações externas | Alertas por e-mail ou Telegram |
+| `@app.on_event("startup")` deprecado | Migrar para `lifespan` context manager (FastAPI moderno) |
 
 ---
 
