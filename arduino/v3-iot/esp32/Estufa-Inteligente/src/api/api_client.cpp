@@ -5,6 +5,7 @@
 
 // ─────────────────────────────────────────────────
 // 🌐 CONFIGURAÇÃO DA API
+// Altere o IP para o endereço da máquina com o backend
 // ─────────────────────────────────────────────────
 
 const char* serverURL = "http://192.168.0.122:8000";
@@ -20,13 +21,15 @@ void sendDataToAPI(SensorData data) {
         return;
     }
 
-    // Monta JSON
+    // Monta JSON com todos os campos incluindo os de nível
     StaticJsonDocument<256> doc;
-    doc["temperatura"]    = data.temperatura;
-    doc["umidade_ar"]     = data.umidade_ar;
-    doc["luminosidade"]   = data.luminosidade;
-    doc["umidade_solo_1"] = data.umidade_solo_1;
-    doc["umidade_solo_2"] = data.umidade_solo_2;
+    doc["temperatura"]     = data.temperatura;
+    doc["umidade_ar"]      = data.umidade_ar;
+    doc["luminosidade"]    = data.luminosidade;
+    doc["umidade_solo_1"]  = data.umidade_solo_1;
+    doc["umidade_solo_2"]  = data.umidade_solo_2;
+    doc["nivel_agua"]      = data.nivel_agua;
+    doc["nivel_nutriente"] = data.nivel_nutriente;
 
     String json;
     serializeJson(doc, json);
@@ -47,7 +50,6 @@ void sendDataToAPI(SensorData data) {
         }
 
         Serial.printf("[API] Falha POST tentativa %d → %d\n", tentativa, httpCode);
-
         http.end();
         delay(500);
     }
@@ -61,7 +63,7 @@ void sendDataToAPI(SensorData data) {
 
 SystemStatus getStatusFromAPI() {
 
-    SystemStatus status = { false, false, false }; // estado seguro
+    SystemStatus status = { false, false, false };
 
     if (WiFi.status() != WL_CONNECTED) {
         Serial.println("[API] WiFi desconectado — GET cancelado");
@@ -92,7 +94,6 @@ SystemStatus getStatusFromAPI() {
                 status.water_pump,
                 status.nutr_pump
             );
-
         } else {
             Serial.printf("[API] Erro JSON → %s\n", erro.c_str());
         }

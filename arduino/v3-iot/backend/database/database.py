@@ -1,7 +1,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 
-INTERVALO = 900
+INTERVALO = 900  # segundos mínimos entre registros no histórico
 
 
 def connect() -> sqlite3.Connection:
@@ -20,6 +20,8 @@ def create_tables():
         luminosidade INTEGER,
         umidade_solo_1 INTEGER,
         umidade_solo_2 INTEGER,
+        nivel_agua INTEGER DEFAULT 1,
+        nivel_nutriente INTEGER DEFAULT 1,
         timestamp TEXT
     )
     """)
@@ -44,9 +46,6 @@ def create_tables():
     )
     """)
 
-    # NOVO — tabela de regras automáticas configuráveis
-    # Guarda os limiares que a lógica usa para ligar/desligar atuadores.
-    # Uma única linha (id=1) é sempre atualizada via UPDATE.
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS regras (
         id INTEGER PRIMARY KEY,
@@ -58,11 +57,37 @@ def create_tables():
 
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON dados_estufa(timestamp)")
 
-    # Garante que a linha padrão exista nas tabelas singleton
     cursor.execute("INSERT OR IGNORE INTO config (id) VALUES (1)")
     cursor.execute("INSERT OR IGNORE INTO regras (id) VALUES (1)")
 
     conn.commit()
+    conn.close()
+
+    # Migração segura para bancos já existentes
+    _migrate()
+
+
+def _migrate():
+    """
+    Adiciona colunas novas em bancos existentes sem destruir dados.
+    ALTER TABLE ignora silenciosamente se a coluna já existir (via try/except).
+    """
+    conn = connect()
+    cursor = conn.cursor()
+
+    migrations = [
+        "ALTER TABLE dados_estufa ADD COLUMN nivel_agua INTEGER DEFAULT 1",
+        "ALTER TABLE dados_estufa ADD COLUMN nivel_nutriente INTEGER DEFAULT 1",
+    ]
+
+    for sql in migrations:
+        try:
+            cursor.execute(sql)
+            conn.commit()
+            print(f"[DB] Migração aplicada: {sql.split('ADD COLUMN')[1].strip()}")
+        except sqlite3.OperationalError:
+            pass  # Coluna já existe — ignorar
+
     conn.close()
 
 
@@ -83,11 +108,13 @@ def insert_dados(data):
 
     cursor.execute("""
         INSERT INTO dados_estufa
-        (temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?)
+        (temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2,
+         nivel_agua, nivel_nutriente, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data.temperatura, data.umidade_ar, data.luminosidade,
         data.umidade_solo_1, data.umidade_solo_2,
+        int(data.nivel_agua), int(data.nivel_nutriente),
         agora.strftime("%Y-%m-%d %H:%M:%S")
     ))
 
@@ -155,7 +182,8 @@ def get_last_data() -> dict:
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2
+        SELECT temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2,
+               nivel_agua, nivel_nutriente
         FROM dados_estufa ORDER BY id DESC LIMIT 1
     """)
     row = cursor.fetchone()
@@ -165,8 +193,13 @@ def get_last_data() -> dict:
         return {
             "temperatura": row[0], "umidade_ar": row[1], "luminosidade": row[2],
             "umidade_solo_1": row[3], "umidade_solo_2": row[4],
+            "nivel_agua": bool(row[5]), "nivel_nutriente": bool(row[6]),
         }
-    return {"temperatura": 0, "umidade_ar": 0, "luminosidade": 0, "umidade_solo_1": 0, "umidade_solo_2": 0}
+    return {
+        "temperatura": 0, "umidade_ar": 0, "luminosidade": 0,
+        "umidade_solo_1": 0, "umidade_solo_2": 0,
+        "nivel_agua": True, "nivel_nutriente": True,
+    }
 
 
 def get_historico(periodo: str) -> list:
@@ -177,15 +210,20 @@ def get_historico(periodo: str) -> list:
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2, timestamp
+        SELECT temperatura, umidade_ar, luminosidade, umidade_solo_1, umidade_solo_2,
+               nivel_agua, nivel_nutriente, timestamp
         FROM dados_estufa WHERE timestamp >= ? ORDER BY timestamp ASC
     """, (inicio,))
     rows = cursor.fetchall()
     conn.close()
 
     return [
-        {"temperatura": r[0], "umidade_ar": r[1], "luminosidade": r[2],
-         "umidade_solo_1": r[3], "umidade_solo_2": r[4], "timestamp": r[5]}
+        {
+            "temperatura": r[0], "umidade_ar": r[1], "luminosidade": r[2],
+            "umidade_solo_1": r[3], "umidade_solo_2": r[4],
+            "nivel_agua": bool(r[5]), "nivel_nutriente": bool(r[6]),
+            "timestamp": r[7]
+        }
         for r in rows
     ]
 
@@ -214,10 +252,7 @@ def set_manual_control(data: dict):
     conn.close()
 
 
-# ── NOVO — Regras configuráveis ────────────────────
-
 def get_regras() -> dict:
-    """Retorna os limiares automáticos salvos no banco."""
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("SELECT temp_max, solo_min, planta_id FROM regras WHERE id = 1")
@@ -230,7 +265,6 @@ def get_regras() -> dict:
 
 
 def set_regras(data: dict):
-    """Salva novos limiares automáticos no banco."""
     conn = connect()
     cursor = conn.cursor()
     cursor.execute("""

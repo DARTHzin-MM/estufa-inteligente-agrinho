@@ -9,6 +9,8 @@ class SensorData(BaseModel):
     luminosidade: int
     umidade_solo_1: int
     umidade_solo_2: int
+    nivel_agua: bool = True
+    nivel_nutriente: bool = True
 
 
 # Estado dos atuadores retornado ao ESP32 via GET /status
@@ -26,10 +28,7 @@ class ManualControl(BaseModel):
     nutr_pump: Optional[bool] = None
 
 
-# NOVO — regras automáticas configuráveis por perfil de planta
-# temp_max: acima deste valor o cooler é acionado
-# solo_min: abaixo deste valor a bomba de água é acionada
-# planta_id: identificador textual da planta selecionada (ex: "tomate")
+# Regras automáticas configuráveis por perfil de planta
 class RegrasConfig(BaseModel):
     temp_max: float = 30.0
     solo_min: float = 30.0

@@ -1,11 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR" data-theme="dark">
-<!--
-  data-theme="dark" no <html> é o ponto central do sistema de temas.
-  O CSS usa [data-theme="light"] para sobrescrever as variáveis.
-  O script.js alterna esse atributo com:
-    document.documentElement.setAttribute('data-theme', 'light')
--->
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,24 +8,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════
-       CONTAINER DE TOASTS
-       Fica no canto inferior direito da tela.
-       O script.js injeta os toasts aqui dinamicamente.
-  ════════════════════════════════════════════ -->
   <div class="toast-container" id="toast-container"></div>
 
-  <!-- ═══════════════════════════════════════════
-       SIDEBAR FIXA
-  ════════════════════════════════════════════ -->
+  <!-- ═══════════════ SIDEBAR ════════════════ -->
   <aside class="sidebar">
-
     <div class="sidebar-logo">
       <div class="logo-icon">🌿</div>
       <div class="logo-text">
@@ -53,6 +38,10 @@
         <span class="nav-icon">🌱</span>
         <span>Plantas</span>
       </a>
+      <a href="#nutricao" class="nav-item" data-page="nutricao">
+        <span class="nav-icon">🧪</span>
+        <span>Nutrição</span>
+      </a>
       <a href="#controle" class="nav-item" data-page="controle">
         <span class="nav-icon">⚙</span>
         <span>Controle</span>
@@ -63,40 +52,26 @@
       <div class="status-dot"></div>
       <span>Sistema online</span>
     </div>
-
   </aside>
 
-  <!-- ═══════════════════════════════════════════
-       CONTEÚDO PRINCIPAL
-  ════════════════════════════════════════════ -->
+  <!-- ═══════════════ MAIN ════════════════ -->
   <div class="main-wrapper">
 
     <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-left">
         <h1 class="page-title" id="page-title">Painel Principal</h1>
-
-        <!-- Badge "Atualizado: HH:MM:SS"
-             Fica vermelho se passar 15s sem dado novo (classe .stale adicionada pelo JS) -->
         <div class="last-update">
           <span class="pulse-dot"></span>
           <span>Atualizado: <strong id="last-update-time">—</strong></span>
         </div>
-
-        <!-- Indicador de status da API: Online/Offline -->
         <div class="api-status" id="api-status">
           <span class="status-dot offline" id="api-dot"></span>
           <span id="api-text">Conectando...</span>
         </div>
       </div>
-
       <div class="topbar-right">
-        <!-- Botão de alternância de tema (☀️ / 🌙)
-             O ícone é atualizado pelo JS em aplicarTema() -->
-        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema claro/escuro">
-          ☀️
-        </button>
-
+        <button class="theme-toggle-btn" id="theme-toggle-btn" title="Alternar tema">☀️</button>
         <div class="user-badge">
           <div class="user-avatar">G</div>
           <div class="user-info">
@@ -110,29 +85,44 @@
     <!-- ════ PÁGINA: HOME ════ -->
     <main class="page-content" id="page-home">
 
-      <!-- Alertas dinâmicos — preenchidos pelo JS -->
       <section class="alerts-section" id="alerts-section"></section>
 
+      <!-- RESERVATÓRIOS -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Reservatórios</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="reservatorio-grid">
+        <div class="reservatorio-card" id="res-agua">
+          <div class="res-icon-wrap">💧</div>
+          <div class="res-body">
+            <span class="res-label">Reservatório de Água</span>
+            <span class="res-status" id="res-status-agua">Verificando...</span>
+          </div>
+          <div class="res-indicator" id="res-ind-agua"></div>
+        </div>
+        <div class="reservatorio-card" id="res-nutriente">
+          <div class="res-icon-wrap">🧪</div>
+          <div class="res-body">
+            <span class="res-label">Solução Nutritiva</span>
+            <span class="res-status" id="res-status-nutriente">Verificando...</span>
+          </div>
+          <div class="res-indicator" id="res-ind-nutriente"></div>
+        </div>
+      </div>
+
+      <!-- SENSORES -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Sensores Ambientais</span>
         <span class="label-line"></span>
       </div>
 
-      <!-- ─── GRID DE SENSORES ───
-           Cada card tem:
-           - card-icon-wrap: ícone colorido
-           - card-label: nome do sensor
-           - card-value: número grande
-           - card-status-badge: "Ideal", "Atenção", "Crítico" (o JS adiciona a classe status-*)
-           - card-bar-wrap: barra de progresso
-      -->
       <div class="sensor-grid">
-
         <div class="sensor-card" id="card-temperatura">
-          <div class="card-icon-wrap" style="--icon-color: #f97316;">
-            <span>🌡</span>
-          </div>
+          <div class="card-icon-wrap" style="--icon-color: #f97316;"><span>🌡</span></div>
           <div class="card-body">
             <span class="card-label">Temperatura</span>
             <div class="card-value-row">
@@ -141,15 +131,11 @@
             </div>
             <span class="card-status-badge"></span>
           </div>
-          <div class="card-bar-wrap">
-            <div class="card-bar" id="bar-temperatura" style="--bar-color: #f97316;"></div>
-          </div>
+          <div class="card-bar-wrap"><div class="card-bar" id="bar-temperatura" style="--bar-color: #f97316;"></div></div>
         </div>
 
         <div class="sensor-card" id="card-umidade_ar">
-          <div class="card-icon-wrap" style="--icon-color: #38bdf8;">
-            <span>💧</span>
-          </div>
+          <div class="card-icon-wrap" style="--icon-color: #38bdf8;"><span>💧</span></div>
           <div class="card-body">
             <span class="card-label">Umidade do Ar</span>
             <div class="card-value-row">
@@ -158,15 +144,11 @@
             </div>
             <span class="card-status-badge"></span>
           </div>
-          <div class="card-bar-wrap">
-            <div class="card-bar" id="bar-umidade_ar" style="--bar-color: #38bdf8;"></div>
-          </div>
+          <div class="card-bar-wrap"><div class="card-bar" id="bar-umidade_ar" style="--bar-color: #38bdf8;"></div></div>
         </div>
 
         <div class="sensor-card" id="card-luminosidade">
-          <div class="card-icon-wrap" style="--icon-color: #facc15;">
-            <span>☀</span>
-          </div>
+          <div class="card-icon-wrap" style="--icon-color: #facc15;"><span>☀</span></div>
           <div class="card-body">
             <span class="card-label">Luminosidade</span>
             <div class="card-value-row">
@@ -175,15 +157,11 @@
             </div>
             <span class="card-status-badge"></span>
           </div>
-          <div class="card-bar-wrap">
-            <div class="card-bar" id="bar-luminosidade" style="--bar-color: #facc15;"></div>
-          </div>
+          <div class="card-bar-wrap"><div class="card-bar" id="bar-luminosidade" style="--bar-color: #facc15;"></div></div>
         </div>
 
         <div class="sensor-card" id="card-umidade_solo_1">
-          <div class="card-icon-wrap" style="--icon-color: #84cc16;">
-            <span>🌱</span>
-          </div>
+          <div class="card-icon-wrap" style="--icon-color: #84cc16;"><span>🌱</span></div>
           <div class="card-body">
             <span class="card-label">Umidade Solo 1</span>
             <div class="card-value-row">
@@ -192,15 +170,11 @@
             </div>
             <span class="card-status-badge"></span>
           </div>
-          <div class="card-bar-wrap">
-            <div class="card-bar" id="bar-umidade_solo_1" style="--bar-color: #84cc16;"></div>
-          </div>
+          <div class="card-bar-wrap"><div class="card-bar" id="bar-umidade_solo_1" style="--bar-color: #84cc16;"></div></div>
         </div>
 
         <div class="sensor-card" id="card-umidade_solo_2">
-          <div class="card-icon-wrap" style="--icon-color: #4ade80;">
-            <span>🌿</span>
-          </div>
+          <div class="card-icon-wrap" style="--icon-color: #4ade80;"><span>🌿</span></div>
           <div class="card-body">
             <span class="card-label">Umidade Solo 2</span>
             <div class="card-value-row">
@@ -209,13 +183,11 @@
             </div>
             <span class="card-status-badge"></span>
           </div>
-          <div class="card-bar-wrap">
-            <div class="card-bar" id="bar-umidade_solo_2" style="--bar-color: #4ade80;"></div>
-          </div>
+          <div class="card-bar-wrap"><div class="card-bar" id="bar-umidade_solo_2" style="--bar-color: #4ade80;"></div></div>
         </div>
+      </div>
 
-      </div><!-- fim sensor-grid -->
-
+      <!-- ATUADORES -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Atuadores</span>
@@ -223,7 +195,6 @@
       </div>
 
       <div class="actuator-grid">
-
         <div class="actuator-card" id="act-cooler">
           <div class="actuator-top">
             <span class="actuator-icon">🌀</span>
@@ -232,7 +203,6 @@
           <span class="actuator-label">Cooler</span>
           <div class="actuator-indicator" id="ind-cooler"></div>
         </div>
-
         <div class="actuator-card" id="act-water_pump">
           <div class="actuator-top">
             <span class="actuator-icon">🚿</span>
@@ -241,7 +211,6 @@
           <span class="actuator-label">Bomba de Água</span>
           <div class="actuator-indicator" id="ind-water_pump"></div>
         </div>
-
         <div class="actuator-card" id="act-nutr_pump">
           <div class="actuator-top">
             <span class="actuator-icon">🧪</span>
@@ -250,9 +219,9 @@
           <span class="actuator-label">Bomba Nutrientes</span>
           <div class="actuator-indicator" id="ind-nutr_pump"></div>
         </div>
+      </div>
 
-      </div><!-- fim actuator-grid -->
-
+      <!-- GRÁFICO TEMPO REAL -->
       <div class="section-label">
         <span class="label-line"></span>
         <span class="label-text">Monitoramento em Tempo Real</span>
@@ -262,20 +231,19 @@
       <div class="chart-card">
         <div class="chart-header">
           <div>
-            <h2 class="chart-title">Temperatura & Umidade do Ar</h2>
+            <h2 class="chart-title">Sensores — Tempo Real</h2>
             <p class="chart-sub">Atualização automática a cada 5 segundos</p>
           </div>
-          <div class="chart-legend">
-            <span class="legend-item"><span class="legend-dot" style="background:#f97316;"></span>Temperatura (°C)</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade (%)</span>
+          <!-- Toggles de dataset -->
+          <div class="chart-toggles" id="chart-toggles">
+            <button class="chart-toggle-btn" data-dataset="0" style="--tc:#f97316">🌡 Temp</button>
+            <button class="chart-toggle-btn" data-dataset="1" style="--tc:#38bdf8">💧 Umid. Ar</button>
+            <button class="chart-toggle-btn" data-dataset="2" style="--tc:#84cc16">🌱 Solo 1</button>
+            <button class="chart-toggle-btn" data-dataset="3" style="--tc:#4ade80">🌿 Solo 2</button>
           </div>
         </div>
-
-        <!-- position: relative no .chart-wrap permite posicionar o estado vazio por cima -->
         <div class="chart-wrap">
           <canvas id="mainChart"></canvas>
-          <!-- Estado vazio: aparece quando não há dados ainda.
-               O JS adiciona/remove a classe .visible -->
           <div class="chart-empty-state" id="chart-empty-main">
             <span class="chart-empty-icon">📡</span>
             <span>Aguardando dados da API...</span>
@@ -283,9 +251,7 @@
           </div>
         </div>
       </div>
-
     </main>
-    <!-- ════ FIM PÁGINA HOME ════ -->
 
     <!-- ════ PÁGINA: HISTÓRICO ════ -->
     <main class="page-content hidden" id="page-historico">
@@ -300,6 +266,7 @@
         <button class="period-btn active" data-period="dia">Último Dia</button>
         <button class="period-btn" data-period="semana">Última Semana</button>
         <button class="period-btn" data-period="mes">Último Mês</button>
+        <button class="export-btn" id="export-btn" title="Baixar CSV">⬇ Exportar CSV</button>
       </div>
 
       <div class="chart-card">
@@ -309,10 +276,10 @@
             <p class="chart-sub" id="historico-sub">Selecione um período acima</p>
           </div>
           <div class="chart-legend">
-            <span class="legend-item"><span class="legend-dot" style="background:#f97316;"></span>Temperatura (°C)</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade Ar (%)</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#84cc16;"></span>Solo 1 (%)</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>Solo 2 (%)</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#f97316;"></span>Temperatura</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span>Umidade Ar</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#84cc16;"></span>Solo 1</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#4ade80;"></span>Solo 2</span>
           </div>
         </div>
         <div class="chart-wrap" style="height: 320px;">
@@ -320,22 +287,148 @@
           <div class="chart-empty-state" id="chart-empty-historico">
             <span class="chart-empty-icon">🗂</span>
             <span>Nenhum dado para este período</span>
-            <span style="font-size:11px; opacity:0.6;">Tente um período maior ou verifique o banco de dados</span>
           </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ════ PÁGINA: PLANTAS ════ -->
+    <main class="page-content hidden" id="page-plantas">
+      <div class="section-label"><span class="label-line"></span><span class="label-text">Perfil Ativo</span><span class="label-line"></span></div>
+      <div class="planta-ativa-banner oculto" id="planta-ativa-banner">
+        <span class="planta-ativa-banner-emoji" id="planta-ativa-emoji"></span>
+        <span>Perfil ativo: <strong id="planta-ativa-nome">—</strong> — regras automáticas atualizadas</span>
+      </div>
+      <div class="section-label"><span class="label-line"></span><span class="label-text">Filtrar por Categoria</span><span class="label-line"></span></div>
+      <div class="categoria-filter" id="categoria-filter">
+        <button class="categoria-btn active" data-cat="Todos">Todos</button>
+      </div>
+      <div class="plantas-grid" id="plantas-grid"></div>
+    </main>
+
+    <!-- ════ PÁGINA: NUTRIÇÃO ════ -->
+    <main class="page-content hidden" id="page-nutricao">
+
+      <!-- Hero informativo -->
+      <div class="nutricao-hero">
+        <div class="nutricao-hero-content">
+          <h2 class="nutricao-hero-title">Guia de Solução Nutritiva</h2>
+          <p class="nutricao-hero-desc">
+            A solução nutritiva é o coração de qualquer estufa de cultivo intensivo. Ela fornece os macro e micronutrientes
+            que as plantas não conseguem obter do solo compactado de uma estufa. Escolha a fórmula adequada para
+            cada cultura e veja a diferença no crescimento e na produtividade.
+          </p>
+        </div>
+        <div class="nutricao-hero-stats">
+          <div class="hero-stat"><span class="hero-stat-val">NPK</span><span class="hero-stat-label">Macronutrientes</span></div>
+          <div class="hero-stat"><span class="hero-stat-val">5.5–6.5</span><span class="hero-stat-label">pH Ideal</span></div>
+          <div class="hero-stat"><span class="hero-stat-val">1–3 ms</span><span class="hero-stat-label">CE Ideal</span></div>
+        </div>
+      </div>
+
+      <!-- Conceitos essenciais -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Conceitos Essenciais</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="conceitos-grid">
+        <div class="conceito-card">
+          <span class="conceito-icon">⚗️</span>
+          <h4>pH da Solução</h4>
+          <p>Controla a disponibilidade dos nutrientes. pH fora da faixa (5.5–6.5) torna nutrientes insolúveis mesmo que estejam presentes.</p>
+          <div class="conceito-tip">💡 Eleve com bicarbonato de sódio, reduza com ácido cítrico diluído</div>
+        </div>
+        <div class="conceito-card">
+          <span class="conceito-icon">⚡</span>
+          <h4>Condutividade Elétrica (CE)</h4>
+          <p>Mede a concentração total de sais na solução. CE baixa = planta com fome. CE alta = toxidade por excesso de sais.</p>
+          <div class="conceito-tip">💡 Hortaliças: 1.5–2.5 mS/cm. Frutas: 2.0–3.5 mS/cm</div>
+        </div>
+        <div class="conceito-card">
+          <span class="conceito-icon">🔄</span>
+          <h4>Troca da Solução</h4>
+          <p>Com o tempo, os nutrientes ficam desbalanceados mesmo com reposição. A solução completa deve ser trocada periodicamente.</p>
+          <div class="conceito-tip">💡 Troque a cada 7–14 dias ou quando o volume cair pela metade</div>
+        </div>
+        <div class="conceito-card">
+          <span class="conceito-icon">💧</span>
+          <h4>Qualidade da Água</h4>
+          <p>Água com muito cloro ou dureza alta interfere no pH e na CE. Idealmente use água filtrada ou deixe repousar 24h antes.</p>
+          <div class="conceito-tip">💡 Água de torneira com cloro: deixe 30min em recipiente aberto antes de usar</div>
+        </div>
+      </div>
+
+      <!-- Receitas -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Fórmulas e Receitas</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="solucao-grid" id="solucao-grid">
+        <!-- Gerado pelo script.js -->
+      </div>
+
+      <!-- Tabela de quando usar cada fórmula -->
+      <div class="section-label">
+        <span class="label-line"></span>
+        <span class="label-text">Quando usar cada fórmula</span>
+        <span class="label-line"></span>
+      </div>
+
+      <div class="quando-usar-table">
+        <div class="quando-header">
+          <span>Fórmula</span>
+          <span>Plantas indicadas</span>
+          <span>Fase</span>
+          <span>Dificuldade</span>
+        </div>
+        <div class="quando-row">
+          <span>🧴 NPK Comercial</span>
+          <span>Qualquer hortaliça</span>
+          <span>Todas as fases</span>
+          <span class="diff-badge easy">Fácil</span>
+        </div>
+        <div class="quando-row">
+          <span>♻️ Caseira básica</span>
+          <span>Alface, rúcula, espinafre</span>
+          <span>Fase vegetativa</span>
+          <span class="diff-badge medium">Médio</span>
+        </div>
+        <div class="quando-row">
+          <span>🥬 Folhosas (Hoagland)</span>
+          <span>Alface, couve, espinafre, rúcula</span>
+          <span>Vegetativa intensa</span>
+          <span class="diff-badge medium">Médio</span>
+        </div>
+        <div class="quando-row">
+          <span>🍅 Frutas e Legumes</span>
+          <span>Tomate, pimentão, pepino, morango</span>
+          <span>Floração e frutificação</span>
+          <span class="diff-badge hard">Avançado</span>
+        </div>
+        <div class="quando-row">
+          <span>🥕 Raízes e Tubérculos</span>
+          <span>Cenoura, beterraba, batata</span>
+          <span>Desenvolvimento da raiz</span>
+          <span class="diff-badge hard">Avançado</span>
+        </div>
+        <div class="quando-row">
+          <span>🌿 Ervas Aromáticas</span>
+          <span>Manjericão, salsinha, coentro</span>
+          <span>Todas as fases</span>
+          <span class="diff-badge easy">Fácil</span>
         </div>
       </div>
 
     </main>
-    <!-- ════ FIM PÁGINA HISTÓRICO ════ -->
 
     <!-- ════ PÁGINA: CONTROLE ════ -->
     <main class="page-content hidden" id="page-controle">
 
-      <div class="section-label">
-        <span class="label-line"></span>
-        <span class="label-text">Modo de Operação</span>
-        <span class="label-line"></span>
-      </div>
+      <div class="section-label"><span class="label-line"></span><span class="label-text">Modo de Operação</span><span class="label-line"></span></div>
 
       <section class="mode-card">
         <div class="mode-info">
@@ -351,85 +444,29 @@
         </div>
       </section>
 
-      <div class="section-label">
-        <span class="label-line"></span>
-        <span class="label-text">Atuadores</span>
-        <span class="label-line"></span>
-      </div>
+      <div class="section-label"><span class="label-line"></span><span class="label-text">Atuadores</span><span class="label-line"></span></div>
 
       <div class="control-grid">
-
         <div class="control-card" id="ctrl-cooler">
-          <div class="control-top">
-            <span class="control-icon">🌀</span>
-            <span class="control-name">Cooler</span>
-          </div>
+          <div class="control-top"><span class="control-icon">🌀</span><span class="control-name">Cooler</span></div>
           <div class="control-status" id="ctrl-status-cooler">—</div>
-          <button type="button" class="control-btn" id="ctrl-btn-cooler" onclick="toggleAtuador('cooler')" disabled>
-            Ligar
-          </button>
+          <button type="button" class="control-btn" id="ctrl-btn-cooler" onclick="toggleAtuador('cooler')" disabled>Ligar</button>
         </div>
-
         <div class="control-card" id="ctrl-water_pump">
-          <div class="control-top">
-            <span class="control-icon">🚿</span>
-            <span class="control-name">Bomba de Água</span>
-          </div>
+          <div class="control-top"><span class="control-icon">🚿</span><span class="control-name">Bomba de Água</span></div>
           <div class="control-status" id="ctrl-status-water_pump">—</div>
-          <button type="button" class="control-btn" id="ctrl-btn-water_pump" onclick="toggleAtuador('water_pump')" disabled>
-            Ligar
-          </button>
+          <button type="button" class="control-btn" id="ctrl-btn-water_pump" onclick="toggleAtuador('water_pump')" disabled>Ligar</button>
         </div>
-
         <div class="control-card" id="ctrl-nutr_pump">
-          <div class="control-top">
-            <span class="control-icon">🧪</span>
-            <span class="control-name">Bomba Nutrientes</span>
-          </div>
+          <div class="control-top"><span class="control-icon">🧪</span><span class="control-name">Bomba Nutrientes</span></div>
           <div class="control-status" id="ctrl-status-nutr_pump">—</div>
-          <button type="button" class="control-btn" id="ctrl-btn-nutr_pump" onclick="toggleAtuador('nutr_pump')" disabled>
-            Ligar
-          </button>
+          <button type="button" class="control-btn" id="ctrl-btn-nutr_pump" onclick="toggleAtuador('nutr_pump')" disabled>Ligar</button>
         </div>
-
       </div>
 
     </main>
-    <!-- ════ FIM PÁGINA CONTROLE ════ -->
-
-  <!-- ════ PÁGINA: PLANTAS ════ -->
-    <main class="page-content hidden" id="page-plantas">
-
-      <div class="section-label">
-        <span class="label-line"></span>
-        <span class="label-text">Perfil Ativo</span>
-        <span class="label-line"></span>
-      </div>
-
-      <div class="planta-ativa-banner oculto" id="planta-ativa-banner">
-        <span class="planta-ativa-banner-emoji" id="planta-ativa-emoji"></span>
-        <span>Perfil ativo: <strong id="planta-ativa-nome">—</strong> — regras automáticas atualizadas</span>
-      </div>
-
-      <div class="section-label">
-        <span class="label-line"></span>
-        <span class="label-text">Filtrar por Categoria</span>
-        <span class="label-line"></span>
-      </div>
-
-      <div class="categoria-filter" id="categoria-filter">
-        <button class="categoria-btn active" data-cat="Todos">Todos</button>
-      </div>
-
-      <div class="plantas-grid" id="plantas-grid">
-        <!-- Cards gerados pelo script.js -->
-      </div>
-
-    </main>
-    <!-- ════ FIM PÁGINA PLANTAS ════ -->
 
   </div><!-- fim main-wrapper -->
-
   <script src="script.js"></script>
 </body>
 </html>

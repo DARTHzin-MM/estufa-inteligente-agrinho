@@ -17,7 +17,12 @@ void initSensors() {
     pinMode(SOIL_PIN_2, INPUT);
     pinMode(LDR_PIN,    INPUT);
 
-    Serial.println("[Sensors] Sensores inicializados");
+    // XKC-Y26 NPN — INPUT_PULLUP garante HIGH quando sem líquido
+    // Quando o sensor detecta líquido, puxa a saída para LOW
+    pinMode(WATER_LEVEL_PIN, INPUT_PULLUP);
+    pinMode(NUTR_LEVEL_PIN,  INPUT_PULLUP);
+
+    Serial.println("[Sensors] Sensores inicializados (incluindo nível de reservatório)");
 }
 
 // ─────────────────────────────────────────────────
@@ -40,19 +45,29 @@ SensorData readSensors() {
         data.umidade_ar  = hum;
     }
 
-    // ── Leitura analógica ──
+    // ── Solo e LDR (analógico, normalizado 0–100) ──
     int solo1 = analogRead(SOIL_PIN_1);
     int solo2 = analogRead(SOIL_PIN_2);
     int luz   = analogRead(LDR_PIN);
 
-    // ── Normalização (0–100) ──
-
-    // Solo (invertido: seco → 0 | molhado → 100)
+    // Solo: invertido — seco = ADC alto, molhado = ADC baixo
     data.umidade_solo_1 = constrain(map(solo1, 4095, 0, 0, 100), 0, 100);
     data.umidade_solo_2 = constrain(map(solo2, 4095, 0, 0, 100), 0, 100);
+    data.luminosidade   = constrain(map(luz,   0, 4095, 0, 100), 0, 100);
 
-    // LDR (pode precisar inverter dependendo do circuito)
-    data.luminosidade = constrain(map(luz, 0, 4095, 0, 100), 0, 100);
+    // ── Nível de reservatório (XKC-Y26 NPN) ──
+    // LOW  = sensor ativo = líquido presente = reservatório tem água
+    // HIGH = sem líquido  = reservatório VAZIO (INPUT_PULLUP mantém HIGH)
+    // ⚠️ Se o comportamento estiver invertido, troque == LOW por == HIGH
+    data.nivel_agua      = (digitalRead(WATER_LEVEL_PIN) == LOW);
+    data.nivel_nutriente = (digitalRead(NUTR_LEVEL_PIN)  == LOW);
+
+    if (!data.nivel_agua) {
+        Serial.println("[Sensors] ⚠️ Reservatório de ÁGUA vazio!");
+    }
+    if (!data.nivel_nutriente) {
+        Serial.println("[Sensors] ⚠️ Reservatório de NUTRIENTE vazio!");
+    }
 
     return data;
 }

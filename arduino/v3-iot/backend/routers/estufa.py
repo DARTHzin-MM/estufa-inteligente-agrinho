@@ -1,26 +1,20 @@
+import csv
+import io
 from fastapi import APIRouter, Query, HTTPException
+from fastapi.responses import StreamingResponse
 from models.models import SensorData, ManualControl, RegrasConfig
 from database.database import (
     insert_dados, insert_status_obj,
     get_last_status, get_last_data, get_historico,
     get_config, set_manual_control,
-    get_regras, set_regras,          # NOVO
+    get_regras, set_regras,
 )
 from services.logic import calculate_status
 
 router = APIRouter()
 
 # ─────────────────────────────────────────────────────────
-# Dados estáticos das plantas cultivadas em estufas no Brasil.
-# Ficam aqui no backend para que qualquer cliente (dashboard,
-# app mobile futuro) possa consumi-los sem duplicar a lista.
-#
-# Campos:
-#   temp_max  → limiar para ligar o cooler
-#   solo_min  → limiar para ligar a bomba de água
-#   temp      → faixa completa [mínima, ideal_min, ideal_max, máxima]
-#   umidade_ar→ faixa [mín, ideal_min, ideal_max, máx]
-#   solo      → faixa [mín, ideal_min, ideal_max, máx]
+# 🌱 PERFIS DE PLANTAS
 # ─────────────────────────────────────────────────────────
 PLANTAS = [
     {
@@ -177,7 +171,7 @@ PLANTAS = [
     },
     {
         "id": "batata", "nome": "Batata", "emoji": "🥔", "categoria": "Tubérculo",
-        "descricao": "Exige solo úmido e bem aerado. Temperatura amena favorece o tuberização.",
+        "descricao": "Exige solo úmido e bem aerado. Temperatura amena favorece a tuberização.",
         "temp":       {"min": 12, "ideal": [15, 22], "max": 28},
         "umidade_ar": {"min": 55, "ideal": [60, 80], "max": 85},
         "solo":       {"min": 65, "ideal": [70, 85], "max": 90},
@@ -188,21 +182,16 @@ PLANTAS = [
 
 # ─────────────────────────────────────────────────────────
 # 📥 RECEBIMENTO DE DADOS DO ESP32
-# MUDANÇA: agora busca as regras do banco antes de calcular
 # ─────────────────────────────────────────────────────────
 
 @router.post("/dados")
 def receber_dados(data: SensorData):
     try:
         insert_dados(data)
-
-        # Busca os limiares atuais (podem ter sido alterados por perfil de planta)
         regras = get_regras()
         status = calculate_status(data, regras)
         insert_status_obj(status)
-
         return {"mensagem": "Dados recebidos", "status": status}
-
     except Exception as e:
         print("[API] Erro em /dados:", e)
         raise HTTPException(status_code=500, detail="Erro ao processar dados")
@@ -225,7 +214,11 @@ def enviar_status():
     try:
         config = get_config()
         if config["modo_manual"]:
-            return {"cooler": config["cooler"], "water_pump": config["water_pump"], "nutr_pump": config["nutr_pump"]}
+            return {
+                "cooler": config["cooler"],
+                "water_pump": config["water_pump"],
+                "nutr_pump": config["nutr_pump"]
+            }
         return get_last_status()
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erro ao buscar status")
@@ -244,6 +237,43 @@ def buscar_historico(periodo: str = Query(default="dia")):
         return {"periodo": periodo, "total": len(dados), "dados": dados}
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erro ao buscar histórico")
+
+
+@router.get("/historico/export")
+def exportar_historico_csv(periodo: str = Query(default="mes")):
+    """
+    Exporta o histórico de sensores como arquivo CSV para download.
+    Acessar: GET /historico/export?periodo=dia|semana|mes
+    """
+    try:
+        if periodo not in ("dia", "semana", "mes"):
+            periodo = "mes"
+
+        dados = get_historico(periodo)
+
+        if not dados:
+            raise HTTPException(status_code=404, detail="Nenhum dado para este período")
+
+        output = io.StringIO()
+        campos = ["timestamp", "temperatura", "umidade_ar", "luminosidade",
+                  "umidade_solo_1", "umidade_solo_2", "nivel_agua", "nivel_nutriente"]
+
+        writer = csv.DictWriter(output, fieldnames=campos, extrasaction='ignore')
+        writer.writeheader()
+        writer.writerows(dados)
+        output.seek(0)
+
+        nome_arquivo = f"smartgreen_{periodo}.csv"
+        return StreamingResponse(
+            output,
+            media_type="text/csv",
+            headers={"Content-Disposition": f"attachment; filename={nome_arquivo}"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("[API] Erro em /historico/export:", e)
+        raise HTTPException(status_code=500, detail="Erro ao exportar dados")
 
 
 # ─────────────────────────────────────────────────────────
@@ -275,13 +305,11 @@ def set_controle(data: ManualControl):
 
 
 # ─────────────────────────────────────────────────────────
-# 🌱 PLANTAS — NOVO
-# GET /plantas → lista todas as plantas disponíveis
+# 🌱 PLANTAS
 # ─────────────────────────────────────────────────────────
 
 @router.get("/plantas")
 def listar_plantas():
-    """Retorna a lista de perfis de plantas com seus parâmetros ideais."""
     try:
         regras_atuais = get_regras()
         planta_ativa = regras_atuais.get("planta_id")
@@ -291,14 +319,11 @@ def listar_plantas():
 
 
 # ─────────────────────────────────────────────────────────
-# ⚙️ REGRAS AUTOMÁTICAS — NOVO
-# GET  /config/regras → retorna limiares atuais
-# POST /config/regras → atualiza limiares (chamado ao aplicar perfil de planta)
+# ⚙️ REGRAS AUTOMÁTICAS
 # ─────────────────────────────────────────────────────────
 
 @router.get("/config/regras")
 def buscar_regras():
-    """Retorna os limiares automáticos salvos no banco."""
     try:
         return get_regras()
     except Exception as e:
@@ -307,12 +332,6 @@ def buscar_regras():
 
 @router.post("/config/regras")
 def atualizar_regras(data: RegrasConfig):
-    """
-    Atualiza os limiares automáticos no banco.
-    Chamado quando o operador aplica um perfil de planta no dashboard.
-    A partir desta chamada, o ESP32 passa a usar os novos valores
-    na próxima vez que POST /dados for processado.
-    """
     try:
         payload = {
             "temp_max":  data.temp_max,
