@@ -25,22 +25,23 @@ Aumentar a capacidade de monitoramento e controle, aproximando o projeto de uma 
 
 | Componente | Qtd | Função nesta versão |
 |------------|:---:|---------------------|
-| ESP32 Dev Board (38 pinos) | | Microcontrolador principal |
-| Sensor DHT11 | | Temperatura e umidade do ar |
-| Sensor capacitivo de umidade do solo v2.0 | | Solo — ponto 1 |
-| Sensor capacitivo de umidade do solo v2.0 | | Solo — ponto 2 |
-| LDR (fotoresistor) | | Luminosidade |
-| Resistor 10kΩ | | Divisor de tensão para o LDR |
-| Display OLED 0.96" I2C (SSD1306 128x64) | | Exibe dados localmente |
-| Módulo relé 3 canais (5V, ativo em LOW) | | Controla as 3 saídas |
-| Mini bomba de água 5V | | Irrigação |
-| Mini bomba 5V (peristáltica ou submersível) | | Solução nutritiva |
-| Cooler / ventilador 5V ou 12V | | Resfriamento da estufa |
-| Fonte 5V / 12V conforme cooler | | Alimentação |
-| Protoboard | | Montagem |
-| Jumpers macho-macho | | Conexões |
-| Jumpers macho-fêmea | | Sensores e módulos |
-| Mangueiras de silicone | | Água e nutriente |
+| ESP32 Dev Board (30 pinos) | 1 | Microcontrolador principal |
+| Sensor DHT11 | 1 | Temperatura e umidade do ar |
+| Sensor capacitivo de umidade do solo v2.0 | 1 | Solo — ponto 1 |
+| Sensor capacitivo de umidade do solo v2.0 | 1 | Solo — ponto 2 |
+| LDR (fotoresistor) | 1 | Luminosidade |
+| Resistor 10kΩ | 6 | Divisor de tensão |
+| Display OLED 0.96" I2C (SSD1306 128x64) | 1 | Exibe dados localmente |
+| Módulo relé 1 canal (5V, ativo em LOW) | 3 | Controla as 3 saídas |
+| Mini bomba de água 5V (peristáltica ou submersível) | 1 | Irrigação |
+| Mini bomba de água 5V (peristáltica ou submersível) | 1 | Solução nutritiva |
+| Cooler / ventilador 5V ou 12V | 2 | Resfriamento da estufa |
+| MB102 Módulo de fonte de alimentação | 1 | Alimentação |
+| Protoboard | 1 | Montagem |
+| Jumpers macho-macho | 9 | Conexões |
+| Jumpers macho-fêmea | 18 | Sensores e módulos |
+| Jumpers fêmea-fêmea | 12 | Sensores e módulos |
+| Mangueiras de silicone | 3m | Água e nutriente |
 
 ---
 

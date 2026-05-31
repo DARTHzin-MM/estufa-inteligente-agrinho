@@ -35,7 +35,7 @@ O principal avanço desta versão é a separação de responsabilidades entre o 
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| ESP32 Dev Board (38 pinos) | 1 | Microcontrolador principal — WiFi + sensores + relés |
+| ESP32 Dev Board (30 pinos) | 1 | Microcontrolador principal — WiFi + sensores + relés |
 | Cabo Micro USB | 1 | Upload do firmware e alimentação durante desenvolvimento |
 | Fonte 5V DC (adaptador) | 1 | Alimentação em campo |
 
@@ -48,25 +48,26 @@ O principal avanço desta versão é a separação de responsabilidades entre o 
 | LDR (fotoresistor) | 1 | Luminosidade ambiente |
 | Resistor 10kΩ | 1 | Divisor de tensão para o LDR |
 | **Sensor de nível XKC-Y26 NPN** | **2** | **Nível dos reservatórios de água e nutrientes** |
-| **Resistor 10kΩ + 20kΩ** | **2 pares** | **Divisor de tensão obrigatório — converte 5V para 3,3V** |
+| **Resistor 10kΩ + 20kΩ** | **5 pares** | **Divisor de tensão obrigatório — converte 5V para 3,3V** |
 
 ### Atuadores
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
-| Módulo relé 3 canais (5V, ativo em LOW) | 1 | Liga/desliga os 3 atuadores |
+| Módulo relé 1 canal (5V, ativo em LOW) | 3 | Liga/desliga os 3 atuadores |
 | Mini bomba de água submersível 5V | 1 | Irrigação das plantas |
-| Mini bomba 5V | 1 | Distribuição de solução nutritiva |
-| Cooler / ventilador 12V | 1 | Resfriamento da estufa |
+| Mini bomba de água submersível 5V | 1 | Distribuição de solução nutritiva |
+| Cooler / ventilador 12V | 2 | Resfriamento da estufa |
 
 ### Estrutura e conexões
 
 | Componente | Qtd | Função |
 |------------|:---:|--------|
 | Protoboard 830 pontos | 1 | Montagem do circuito |
-| Jumpers macho-macho | 20 | Conexões gerais |
-| Jumpers macho-fêmea | 10 | Sensores e módulos |
-| Mangueira de silicone (metro) | 1 | Condução da água |
+| Jumpers macho-macho | 15 | Conexões gerais |
+| Jumpers macho-fêmea | 16 | Sensores e módulos |
+| Jumpers fêmea-fêmea | 12 | Sensores e módulos |
+| Mangueira de silicone (metro) | 3 | Condução da água |
 
 ### Infraestrutura
 
@@ -83,10 +84,10 @@ O principal avanço desta versão é a separação de responsabilidades entre o 
 |:----------:|-----------|-----------|
 | GPIO 4 | DHT22 | Digital |
 | GPIO 34 (ADC1_CH6) | Sensor de solo 1 | Somente entrada |
-| GPIO 33 (ADC1_CH5) | Sensor de solo 2 | Somente entrada |
-| GPIO 35 (ADC1_CH7) | LDR | Somente entrada |
-| GPIO 22 | XKC-Y26 — reservatório água | INPUT_PULLUP + divisor 10k/20kΩ |
-| GPIO 23 | XKC-Y26 — reservatório nutriente | INPUT_PULLUP + divisor 10k/20kΩ |
+| GPIO 35 (ADC1_CH5) | Sensor de solo 2 | Somente entrada |
+| GPIO 32 (ADC1_CH7) | LDR | Somente entrada |
+| GPIO 13 | XKC-Y26 — reservatório água | INPUT_PULLUP + divisor 10k/20kΩ |
+| GPIO 14 | XKC-Y26 — reservatório nutriente | INPUT_PULLUP + divisor 10k/20kΩ |
 | GPIO 18 | Relé — cooler | Ativo em LOW |
 | GPIO 19 | Relé — bomba de água | Ativo em LOW |
 | GPIO 21 | Relé — bomba de nutriente | Ativo em LOW |

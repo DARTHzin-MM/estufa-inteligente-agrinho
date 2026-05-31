@@ -7,7 +7,7 @@
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 const CONFIG = {
-  API_BASE:         localStorage.getItem('api_base') || 'http://192.168.0.124:8000',
+  API_BASE:         localStorage.getItem('api_base') || 'http://(colocar seu ip):8000',
   UPDATE_INTERVAL:  5000,
   MAX_CHART_POINTS: 20,
   STALE_THRESHOLD_MS: 15000,

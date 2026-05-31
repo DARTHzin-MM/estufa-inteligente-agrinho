@@ -16,7 +16,7 @@ void setup() {
     delay(500);
 
     Serial.println("\n=============================");
-    Serial.println("  SmartGreen — Estufa v2.0  ");
+    Serial.println("  SmartGreen — Estufa v3.0  ");
     Serial.println("=============================");
 
     initWiFi();
@@ -62,5 +62,7 @@ void loop() {
     Serial.printf("  Cooler      : %s\n", status.cooler     ? "ON" : "OFF");
     Serial.printf("  Bomba Água  : %s\n", status.water_pump ? "ON" : "OFF");
     Serial.printf("  Bomba Nutr. : %s\n", status.nutr_pump  ? "ON" : "OFF");
+    Serial.printf("  Nível Água  : %s\n", data.nivel_agua      ? "OK" : "⚠ VAZIO");
+    Serial.printf("  Nível Nutr. : %s\n", data.nivel_nutriente ? "OK" : "⚠ VAZIO");
     Serial.println();
 }

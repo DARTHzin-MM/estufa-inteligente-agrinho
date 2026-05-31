@@ -184,13 +184,30 @@ PLANTAS = [
 # 📥 RECEBIMENTO DE DADOS DO ESP32
 # ─────────────────────────────────────────────────────────
 
+_ultimo_dado: dict = {}
+_ultimo_status: dict = {}
+
 @router.post("/dados")
 def receber_dados(data: SensorData):
+    global _ultimo_dado, _ultimo_status
     try:
-        insert_dados(data)
+        insert_dados(data)          # banco (15min) — histórico
         regras = get_regras()
         status = calculate_status(data, regras)
-        insert_status_obj(status)
+        insert_status_obj(status)   # banco (15min) — histórico
+
+        # ADICIONAR: salva em memória (sempre fresco)
+        _ultimo_dado = {
+            "temperatura":    data.temperatura,
+            "umidade_ar":     data.umidade_ar,
+            "luminosidade":   data.luminosidade,
+            "umidade_solo_1": data.umidade_solo_1,
+            "umidade_solo_2": data.umidade_solo_2,
+            "nivel_agua":     data.nivel_agua,
+            "nivel_nutriente":data.nivel_nutriente,
+        }
+        _ultimo_status = status
+
         return {"mensagem": "Dados recebidos", "status": status}
     except Exception as e:
         print("[API] Erro em /dados:", e)
@@ -204,10 +221,11 @@ def receber_dados(data: SensorData):
 @router.get("/dados")
 def enviar_dados():
     try:
-        return get_last_data()
+        if _ultimo_dado:
+            return _ultimo_dado          
+        return get_last_data()           
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erro ao buscar dados")
-
 
 @router.get("/status")
 def enviar_status():
@@ -215,11 +233,13 @@ def enviar_status():
         config = get_config()
         if config["modo_manual"]:
             return {
-                "cooler": config["cooler"],
+                "cooler":     config["cooler"],
                 "water_pump": config["water_pump"],
-                "nutr_pump": config["nutr_pump"]
+                "nutr_pump":  config["nutr_pump"]
             }
-        return get_last_status()
+        if _ultimo_status:
+            return _ultimo_status        # fresco
+        return get_last_status()         # fallback: banco
     except Exception as e:
         raise HTTPException(status_code=500, detail="Erro ao buscar status")
 

@@ -8,7 +8,7 @@
 // Altere o IP para o endereço da máquina com o backend
 // ─────────────────────────────────────────────────
 
-const char* serverURL = "http://192.168.0.122:8000";
+const char* serverURL = "http://(colocar seu ip):8000";
 
 // ─────────────────────────────────────────────────
 // 📤 ENVIO DE DADOS DOS SENSORES

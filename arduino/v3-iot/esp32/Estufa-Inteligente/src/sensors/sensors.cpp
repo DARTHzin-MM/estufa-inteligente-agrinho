@@ -59,8 +59,8 @@ SensorData readSensors() {
     // LOW  = sensor ativo = líquido presente = reservatório tem água
     // HIGH = sem líquido  = reservatório VAZIO (INPUT_PULLUP mantém HIGH)
     // ⚠️ Se o comportamento estiver invertido, troque == LOW por == HIGH
-    data.nivel_agua      = (digitalRead(WATER_LEVEL_PIN) == LOW);
-    data.nivel_nutriente = (digitalRead(NUTR_LEVEL_PIN)  == LOW);
+    data.nivel_agua      = (digitalRead(WATER_LEVEL_PIN) == HIGH);
+    data.nivel_nutriente = (digitalRead(NUTR_LEVEL_PIN)  == HIGH);
 
     if (!data.nivel_agua) {
         Serial.println("[Sensors] ⚠️ Reservatório de ÁGUA vazio!");
