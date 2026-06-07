@@ -222,8 +222,8 @@ pio device monitor --baud 115200
 |------|--------|
 | Matheus de Paula Martins | Desenvolvimento de firmware (ESP32) e backend |
 | Pietro Barbosa dos Santos | Montagem do hardware e esquemas elétricos |
-| [Nome do integrante 3] | Design e Produção da Apresentação |
-| [Nome da integrante 4] | Construção da Estrutura Física da Estufa |
+| Ana Luiza Nardoni Bosco | Design e Produção da Apresentação |
+| Hillary Kauany da Silva Vitoriano | Construção da Estrutura Física da Estufa |
 
 **Professor orientador:** Emilia
 **Instituição:** C E C M DR GENEROSO MARQUES — Rede Estadual do Paraná
